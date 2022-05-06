@@ -9,22 +9,23 @@
 #PBS -W umask=022
 
 eye_dir="/data/neuroretinal/ukb_master/genetics"
-out_dir="/scratch/gen1/cb334/eyes_gwas"
-pheno="mtcl"
+PATH_DATA="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/data"
+OUT_DIR="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output"
+pheno="pheno_all_age"
 
 module load regenie
 regenie \
   --step 1 \
-  --bed ${eye_dir}/ukb_cal_allchr_v2 \
-  --extract ${eye_dir}/ukb_cal_allchr_eur_qc.snplist \
-  --keep ${eye_dir}/ukb_cal_allchr_eur_qc.id \
-  --phenoFile ${eye_dir}/mtcl_covar.txt \
+  --bed ${PATH_DATA}/ukb_allchr_v3 \
+  --extract ${PATH_DATA}/ukb_cal_allchr_eur_qc.snplist \
+  --keep ${PATH_DATA}/ukb_cal_allchr_eur_qc.id \
+  --phenoFile ${PATH_DATA}/demo_EUR_pheno_cov.txt \
   --phenoCol ${pheno} \
-  --covarFile ${eye_dir}/mtcl_covar.txt \
-  --covarColList age,age2,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10,PC11,PC12,PC13,PC14,PC15,BiLEVE.array,sex \
+  --covarFile ${PATH_DATA}/demo_EUR_pheno_cov.txt \
+  --covarColList age_at_recruitment,age2,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10,sex,genetic_sex \
   --qt \
   --bsize 1000 \
   --loocv \
   --threads 4 \
   --gz \
-  --out ${out_dir}/${pheno}.regenie.step1 
+  --out ${OUT_DIR}/${pheno}.regenie.step1

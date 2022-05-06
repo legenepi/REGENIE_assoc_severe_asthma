@@ -8,31 +8,30 @@
 #PBS -l vmem=64gb
 #PBS -W umask=022
 
-
 chr=$PBS_ARRAYID
-eye_dir="/data/neuroretinal/ukb_master/genetics"
-out_dir="/scratch/gen1/cb334/eyes_gwas"
-pheno="mtcl"
+PATH_DATA="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/data"
+OUT_DIR="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output"
+pheno="pheno_all_age"
 
 module load regenie
 regenie \
   --step 2 \
   --bgen /data/ukb/imputed_v3/ukb_imp_chr${chr}_v3.bgen \
   --ref-first \
-  --sample ${eye_dir}/fam/ukb22828_c1_b0_v3_s487207.sample \
-  --keep ${eye_dir}/ukb_cal_allchr_eur_qc.id \
-  --phenoFile ${eye_dir}/mtcl_covar.txt \
+  #--sample  \
+  --keep ${PATH_DATA}/ukb_cal_allchr_eur_qc.id \
+  --phenoFile $${PATH_DATA}/demo_EUR_pheno_cov.txt \
   --phenoCol ${pheno} \
-  --covarFile ${eye_dir}/mtcl_covar.txt \
-  --covarColList age,age2,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10,PC11,PC12,PC13,PC14,PC15,BiLEVE.array,sex \
+  --covarFile ${PATH_DATA}/demo_EUR_pheno_cov.txt \
+  --covarColList age_at_recruitment,age2,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10,sex,genetic_sex \
   --qt \
   --gz \
   --threads 4 \
   --minMAC 10 \
   --minINFO 0.3 \
   --firth --approx \
-  --pred ${out_dir}/${pheno}.regenie.step1_pred.list \
+  --pred ${OUT_DIR}/${pheno}.regenie.step1_pred.list \
   --bsize 1000 \
-  --out ${out_dir}/${pheno}.${chr}.regenie.step2
+  --out ${OUT_DIR}/${pheno}.${chr}.regenie.step2
 
 
