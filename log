@@ -5,4 +5,13 @@ Logging to /home/n/nnp5/PhD/PhD_project/REGENIE_assoc/data/ukb_cal_allchr_v2.log
 Allocated 51644 MB successfully, after larger attempt(s) failed.
 Performing 3-pass merge (488377 people, 295431/784256 variants per pass).
 Pass 1: fileset #1 complete.Pass 1: fileset #2 complete.Pass 1: fileset #3 complete.Pass 1: fileset #4 complete.Pass 1: fileset #5 complete.Pass 1: fileset #6 complete.Pass 1: fileset #7 complete.Pass 1: fileset #8 complete.Pass 1: fileset #9 complete.Pass 1: fileset #10 complete.Pass 1: fileset #11 complete.Pass 1: fileset #12 complete.Pass 1: fileset #13 complete.Pass 1: fileset #14 complete.Pass 1: fileset #15 complete.Pass 1: fileset #16 complete.Pass 1: fileset #17 complete.Pass 1: fileset #18 complete.Pass 1: fileset #19 complete.Pass 1: fileset #20 complete.Pass 1: fileset #21 complete.                                              Pass 1 complete.
-Pass 2: fileset #1 complete.Pass 2: fileset #2 complete.Pass 2: fileset #3 complete.Pass 2: fileset #4 complete.Pass 2: fileset #5 complete.Pass 2: fileset #6 complete.Pass 2: fileset #7 complete.Pass 2: fileset #8 complete.Pass 2: fileset #9 complete.Pass 2: fileset #10 complete.
+Pass 2: fileset #1 complete.Pass 2: fileset #2 complete.Pass 2: fileset #3 complete.Pass 2: fileset #4 complete.Pass 2: fileset #5 complete.Pass 2: fileset #6 complete.Pass 2: fileset #7 complete.Pass 2: fileset #8 complete.Pass 2: fileset #9 complete.Pass 2: fileset #10 complete.Pass 2: fileset #11 complete.Pass 2: fileset #12 complete.Pass 2: fileset #13 complete.Pass 2: fileset #14 complete.Pass 2: fileset #15 complete.Pass 2: fileset #16 complete.Pass 2: fileset #17 complete.Pass 2: fileset #18 complete.Pass 2: fileset #19 complete.Pass 2: fileset #20 complete.Pass 2: fileset #21 complete.
+Error: File write failure.
+/cm/local/apps/torque/var/spool/mom_priv/jobs/19304999.master.cm.cluster.SC: line 35: plink2: command not found
+PLINK v1.90b3 64-bit (11 Jan 2015)         https://www.cog-genomics.org/plink2
+(C) 2005-2015 Shaun Purcell, Christopher Chang   GNU General Public License v3
+Logging to /scratch/gen1/nnp5/REGENIE_assoc/tmp_data/ukb_cal_allchr_v2.log.
+128639 MB RAM detected; reserving 64319 MB for main workspace.
+Performing 3-pass merge (488377 people, 368001/784256 variants per pass).
+Pass 1: fileset #1 complete.Pass 1: fileset #2 complete./cm/local/apps/torque/var/spool/mom_priv/jobs/19305078.master.cm.cluster.SC: line 35: 16579 Killed                  plink --bed ${geno_dir}/ukb_cal_chr1_v2.bed --bim ${geno_dir}/ukb_cal_chr1_v2.bim --fam ${PATH_DATA}/ukb56607_cal_chr1_v2_s488239.fam --merge-list ${PATH_DATA}/list_plink_files --make-bed --out ${sratch_dir}/ukb_cal_allchr_v2
+/cm/local/apps/torque/var/spool/mom_priv/jobs/19305078.master.cm.cluster.SC: line 36: plink2: command not found
