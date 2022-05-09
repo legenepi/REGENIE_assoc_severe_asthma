@@ -36,18 +36,22 @@ demo %>% filter(pheno_modsev_all_age == 1) %>% count(clustered.ethnicity)
 demo %>% filter(pheno_modsev_adult == 1) %>% count(clustered.ethnicity)
 demo %>% filter(pheno_modsev_early == 1) %>% count(clustered.ethnicity)
 
-demo_EUR <- demo %>% filter(clustered.ethnicity == 'European')
+
 
 #assemble the phenotypes-covariates file
-demo_EUR$FID <- demo_EUR$eid
-demo_EUR$IID <- demo_EUR$eid
+demo$FID <- demo$eid
+demo$IID <- demo$eid
 
-demo_EUR$age2 <- demo_EUR$age_at_recruitment * demo_EUR$age_at_recruitment
+demo <- demo %>% select(FID,
+                        IID,
+                        everything())
 
-demo_EUR_pheno_cov <- demo_EUR %>% select(FID,
-                                          IID,
-                                          everything())
+demo$age2 <- demo$age_at_recruitment * demo$age_at_recruitment
 
-write.table(demo_EUR_pheno_cov,paste0(output_prefix,"demo_EUR_pheno_cov.txt"),
+write.table(demo,paste0(output_prefix,"demo_pheno_cov.txt"),
+row.names = FALSE, col.names = TRUE ,quote=FALSE, sep=" ", na = "NA")
+
+demo_EUR <- demo %>% filter(clustered.ethnicity == 'European')
+write.table(demo_EUR,paste0(output_prefix,"demo_EUR_pheno_cov.txt"),
 row.names = FALSE, col.names = TRUE ,quote=FALSE, sep=" ", na = "NA")
 
