@@ -105,8 +105,9 @@ ggsave(paste0(path_prefix,"genetic_ancestry_modsev_allage.png"))
 #PCA plot:
 TO BE MODIFIED
 pca12_plot <- ggplot(modsev_demo, aes(PC1, PC2, col= clustered.ethnicity, shape = pheno_modsev_all_age))
+pca12_plot <- pca12_plot + geom_point(aes(PC1, PC2, col= clustered.ethnicity))
 pca12_plot <- pca12_plot + scale_color_manual(values = c("#A16928","#c29b64","#e0cfa2","#cbd5bc","#85adaf","#2887a1"))
 pca12_plot <- pca12_plot + theme_light()
 pca12_plot <- pca12_plot + xlab("PC1") + ylab("PC2")
 pca12_plot + ggtitle(paste0("PCs plot modsev asthma"))
-#ggsave(paste0(path_prefix,"PCA12_plot_modsev_allage.png"))
+ggsave(paste0(path_prefix,"PCA12_plot_modsev_allage.png"))
