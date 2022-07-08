@@ -248,11 +248,11 @@ pheno_ratio_FEV1_FVC <- demo %>% select(pheno,ratio_FEV1_FVC)
 means <- aggregate(ratio_FEV1_FVC ~ pheno , pheno_ratio_FEV1_FVC, mean)
 pheno_ratio_FEV1_FVC_boxplot <- pheno_ratio_FEV1_FVC %>% ggplot(aes(pheno,ratio_FEV1_FVC)) +
                       geom_boxplot() +
-                      #ylim(c(0,2.5)) +
+                      ylim(c(0.27,1)) +
                       ylab("FEV1/FVC") +
                       theme_classic() +
-                      geom_text(data = means, aes(label = round(ratio_FEV1_FVC,2), y = 0.10, fontface = "bold"), size = 7) +
+                      geom_text(data = means, aes(label = round(ratio_FEV1_FVC,2), y = 0.28, fontface = "bold"), size = 7) +
                       theme(axis.text.x = element_text(size = 15), axis.text.y = element_text(size = 15),
                       axis.title.y = element_text(size = 16), axis.title.x = element_text(size = 16),
                       legend.title = element_text(size = 16), legend.text = element_text(size = 15))
-ggsave("data/pheno_ratio_FEV1_FVC_boxplot.png",pheno_ratio_FEV1_FVC_boxplot,width=20,height=11)
+ggsave("data/pheno_ratio_FEV1_FVC_boxplot.png",pheno_ratio_FEV1_FVC_boxplot,width=20)
