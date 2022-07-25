@@ -12,7 +12,7 @@
 PATH_DATA="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/data"
 OUT_DIR="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output"
 geno_dir="/data/ukb/genotyped"
-sratch_dir="/scratch/gen1/nnp5/REGENIE_assoc/tmp_data"
+scratch_dir="/scratch/gen1/nnp5/REGENIE_assoc/tmp_data"
 
 #to create list of eur ids
 awk {'print $1, $2'} ${PATH_DATA}/demo_EUR_pheno_cov.txt | tail -n +2 > ${PATH_DATA}/ukb_eur_ids
@@ -30,14 +30,14 @@ plink --bed ${geno_dir}/ukb_cal_chr1_v2.bed \
 	--bim ${geno_dir}/ukb_cal_chr1_v2.bim \
 	--fam ${PATH_DATA}/ukb56607_cal_chr1_v2_s488239.fam \
 	--merge-list ${PATH_DATA}/list_plink_files \
-	--make-bed --out ${sratch_dir}/ukb_cal_allchr_v2
+	--make-bed --out ${scratch_dir}/ukb_cal_allchr_v2
 
 #module load plink2
-#plink2 --bfile ${sratch_dir}/ukb_cal_allchr_v2 \
+#plink2 --bfile ${scratch_dir}/ukb_cal_allchr_v2 \
 #	--maf 0.01 --mac 100 --geno 0.1 --hwe 1e-15 \
 #	--keep ${PATH_DATA}/ukb_eur_ids \
 #	--mind 0.1 \
 #	--write-snplist --write-samples --no-id-header \
-#	--out ${sratch_dir}/ukb_cal_allchr_eur_qc
+#	--out ${scratch_dir}/ukb_cal_allchr_eur_qc
  
  
