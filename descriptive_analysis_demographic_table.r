@@ -48,6 +48,9 @@ modsev_demo_quantitative <- modsev_demo %>% select(eid, genetic_sex, pheno_modse
 #all modsev dataset:
 quant_descr(modsev_demo_quantitative[,-c(1,2,3)])
 
+#venn diagram for cases showing numbers of participants sharing or not sharing different evidences of diagnosis:
+# take the code from previous script !
+
 #case modsev dataset:
 case_modsev_demo_quantitative <- modsev_demo_quantitative %>% filter(pheno_modsev_all_age == 1)
 quant_descr(case_modsev_demo_quantitative[,-c(1,2,3)])
@@ -89,9 +92,7 @@ table(male_case_modsev_demo$pheno_modsev_all_age, male_case_modsev_demo$smoking_
 
 ##same for control, but look again to fin a smarter way to do this. Maybe use barplot ?
 
-
-
-
+#barplot for ethnicity:
 ggplot(modsev_demo %>% filter(clustered.ethnicity != "", clustered.ethnicity != "NA")) +
   aes(x = clustered.ethnicity, fill = clustered.ethnicity) +
   geom_bar() +
@@ -102,11 +103,35 @@ ggplot(modsev_demo %>% filter(clustered.ethnicity != "", clustered.ethnicity != 
   theme(legend.position = "none")
 ggsave(paste0(path_prefix,"genetic_ancestry_modsev_allage.png"))
 
+#barplot for ethnic background:
+#coding1001.tsv from UKBiobank showcase to retrieve actual name for each ethnic group
+ethnic_codename <- read.table(paste0(path_prefix,"coding1001.tsv"),sep="\t",header=TRUE)
+colnames(ethnic_codename)[1] <- "ethnic_background"
+ethnic_codename <- ethnic_codename %>% select(ethnic_background,meaning)
+demo_ethnic <- demo %>% select(eid, ethnic_background)
+demo_ethnic_codename <- left_join(demo_ethnic,ethnic_codename,by="ethnic_background")
+ggplot(demo_ethnic_codename) +
+  aes(x = meaning, fill = meaning) +
+  geom_bar() +
+  xlab("Ethnic background") +
+  ylab("Count") +
+  theme_light() +
+  scale_fill_manual(values = c("#A16928","#c29b64","#e0cfa2","#cbd5bc","#85adaf","#2887a1",
+  "#66C5CC","#F6CF71","#F89C74","#DCB0F2","#87C55F","#9EB9F3","#B3B3B3",
+  "#ffc6c4","#f4a3a8","#e38191","#cc607d","#ad466c","#8b3058","#672044",
+  "#fcde9c","#faa476","#f0746e","#e34f6f","#dc3977")) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+  theme(legend.position = "none")
+ggsave(paste0(path_prefix,"ethnic_background_modsev_allage.png"))
+
+#Donut Plots for ethnicity with pie chart in the middle for case/control status:
+
+
 #PCA plot:
 TO BE MODIFIED
 pca12_plot <- ggplot(modsev_demo, aes(PC1, PC2, col= clustered.ethnicity, shape = pheno_modsev_all_age))
 pca12_plot <- pca12_plot + geom_point(aes(PC1, PC2, col= clustered.ethnicity))
-pca12_plot <- pca12_plot + scale_color_manual(values = c("#A16928","#c29b64","#e0cfa2","#cbd5bc","#85adaf","#2887a1"))
+pca12_plot <- pca12_plot + scale_color_manual(values = c("#A16928","#c29b64","#e0cfa2","#cbd5bc","#85adaf","#2887a1","#"))
 pca12_plot <- pca12_plot + theme_light()
 pca12_plot <- pca12_plot + xlab("PC1") + ylab("PC2")
 pca12_plot + ggtitle(paste0("PCs plot modsev asthma"))

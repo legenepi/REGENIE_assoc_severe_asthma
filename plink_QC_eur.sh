@@ -30,14 +30,14 @@ plink --bed ${geno_dir}/ukb_cal_chr1_v2.bed \
 	--bim ${geno_dir}/ukb_cal_chr1_v2.bim \
 	--fam ${PATH_DATA}/ukb56607_cal_chr1_v2_s488239.fam \
 	--merge-list ${PATH_DATA}/list_plink_files \
-	--make-bed --out ${sratch_dir}/ukb_cal_allchr_v2 &&
+	--make-bed --out ${sratch_dir}/ukb_cal_allchr_v2
 
-module load plink2
-plink2 --bfile ${sratch_dir}/ukb_cal_allchr_v2 \
-	--maf 0.01 --mac 100 --geno 0.1 --hwe 1e-15 \
-	--keep ${PATH_DATA}/ukb_eur_ids \
-	--mind 0.1 \
-	--write-snplist --write-samples --no-id-header \
-	--out ${sratch_dir}/ukb_cal_allchr_eur_qc
+#module load plink2
+#plink2 --bfile ${sratch_dir}/ukb_cal_allchr_v2 \
+#	--maf 0.01 --mac 100 --geno 0.1 --hwe 1e-15 \
+#	--keep ${PATH_DATA}/ukb_eur_ids \
+#	--mind 0.1 \
+#	--write-snplist --write-samples --no-id-header \
+#	--out ${sratch_dir}/ukb_cal_allchr_eur_qc
  
  
