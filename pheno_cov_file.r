@@ -54,3 +54,19 @@ demo_EUR <- demo %>% filter(clustered.ethnicity == 'European')
 write.table(demo_EUR,paste0(output_prefix,"demo_EUR_pheno_cov.txt"),
 row.names = FALSE, col.names = TRUE ,quote=FALSE, sep=" ", na = "NA")
 
+#create sample file for bgen: NOT SURE
+sample <- demo %>% select(FID, IID, genetic_sex)
+colnames(sample) <- c("ID_1","ID_2","genetic_sex")
+sample <- sample %>% mutate(sex = ifelse(sample$genetic_sex == 0, "2",
+                                  ifelse(sample$genetic_sex == 1, "1"), "0")
+sample$sex <- as.factor(sample$sex)
+sample$missing <- as.factor("0")
+sample <- sample %>% select(FID, IID,missing,sex)
+first_line <- data.frame("0", "0", "0", "D")
+colnames(first_line) <- c("ID_1", "ID_2", "missing", "sex")
+sample <- rbind(first_line,sample)
+write.table(sample,paste0(output_prefix,"demo_EUR_pheno_cov.txt"),
+row.names = FALSE, col.names = TRUE ,quote=FALSE, sep=" ", na = "NA")
+
+
+
