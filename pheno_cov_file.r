@@ -21,7 +21,6 @@ demo <- left_join(demo,severe,by="eid")
 
 
 demo <- demo %>% mutate(pheno = case_when(controls == 1 ~ 0, cases == 1 ~ 1))
-demo <- demo%>% filter(!is.na(pheno))
 demo$pheno <- as.factor(demo$pheno)
 
 demo <- demo %>%
@@ -47,26 +46,22 @@ demo <- demo %>% select(FID,
 
 demo$age2 <- demo$age_at_recruitment * demo$age_at_recruitment
 
-write.table(demo,paste0(output_prefix,"demo_pheno_cov.txt"),
+
+
+#order as the sample file:
+sample <- fread("/data/gen1/UKBiobank_500K/severe_asthma/data/ukbiobank_app56607_for_regenie.sample",header=T)
+sample <- sample[-1,]
+colnames(sample) <- c("FID","IID","missing","genetic_sex")
+sample_FID_IID <- sample %>% select(FID, IID)
+
+sample$genetic_sex <- as.factor(sample$genetic_sex)
+demo$genetic_sex <- as.factor(demo$genetic_sex)
+
+sample_demo <- left_join(sample,demo,by=c("FID","IID"))
+
+write.table(sample_demo,paste0(output_prefix,"demo_pheno_cov.txt"),
 row.names = FALSE, col.names = TRUE ,quote=FALSE, sep=" ", na = "NA")
 
-demo_EUR <- demo %>% filter(clustered.ethnicity == 'European')
-write.table(demo_EUR,paste0(output_prefix,"demo_EUR_pheno_cov.txt"),
+sample_demo_EUR <- sample_demo %>% filter(clustered.ethnicity == 'European')
+write.table(sample_demo_EUR,paste0(output_prefix,"demo_EUR_pheno_cov.txt"),
 row.names = FALSE, col.names = TRUE ,quote=FALSE, sep=" ", na = "NA")
-
-#create sample file for bgen: NOT SURE
-sample <- demo %>% select(FID, IID, genetic_sex)
-colnames(sample) <- c("ID_1","ID_2","genetic_sex")
-sample <- sample %>% mutate(sex = ifelse(sample$genetic_sex == 0, "2",
-                                  ifelse(sample$genetic_sex == 1, "1"), "0")
-sample$sex <- as.factor(sample$sex)
-sample$missing <- as.factor("0")
-sample <- sample %>% select(FID, IID,missing,sex)
-first_line <- data.frame("0", "0", "0", "D")
-colnames(first_line) <- c("ID_1", "ID_2", "missing", "sex")
-sample <- rbind(first_line,sample)
-write.table(sample,paste0(output_prefix,"demo_EUR_pheno_cov.txt"),
-row.names = FALSE, col.names = TRUE ,quote=FALSE, sep=" ", na = "NA")
-
-
-
