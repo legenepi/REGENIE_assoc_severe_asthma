@@ -1,5 +1,10 @@
 #!/usr/bin/env Rscript
 
+#run this file as:
+#source /home/n/nnp5/PhD/PhD_project/UKBiobank_datafields/venv/bin/activate
+#module unload R/4.2.1
+#module load R/4.1.0
+
 #upload required libraries
 library(data.table)
 library(tidyverse)
@@ -51,10 +56,10 @@ demo$age2 <- demo$age_at_recruitment * demo$age_at_recruitment
 #order as the sample file:
 sample <- fread("/data/gen1/UKBiobank_500K/severe_asthma/data/ukbiobank_app56607_for_regenie.sample",header=T)
 sample <- sample[-1,]
-colnames(sample) <- c("FID","IID","missing","genetic_sex")
+colnames(sample) <- c("FID","IID","missing","sex_sample_file")
 sample_FID_IID <- sample %>% select(FID, IID)
 
-sample$genetic_sex <- as.factor(sample$genetic_sex)
+sample$sex_sample_file <- as.factor(sample$sex_sample_file)
 demo$genetic_sex <- as.factor(demo$genetic_sex)
 
 sample_demo <- left_join(sample,demo,by=c("FID","IID"))
