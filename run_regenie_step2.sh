@@ -29,10 +29,10 @@ regenie \
   --sample ${sample_DIR}/ukbiobank_app56607_for_regenie.sample \
   --keep ${scratch_DIR}/ukb_cal_allchr_eur_qc.id \
   --phenoFile ${PATH_DATA}/demo_EUR_pheno_cov.txt \
-  --phenoCol ${pheno} \
+  --phenoCol pheno \
   --covarFile ${PATH_DATA}/demo_EUR_pheno_cov.txt \
   --covarColList age_at_recruitment,age2,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10,sex,genetic_sex \
-  --qt \
+  --bt \
   --gz \
   --threads 4 \
   --minMAC 10 \
@@ -41,5 +41,4 @@ regenie \
   --pred ${OUT_DIR}/${pheno}.regenie.step1_pred.list \
   --bsize 1000 \
   --out ${OUT_DIR}/${pheno}.${chr}.regenie.step2
-
 

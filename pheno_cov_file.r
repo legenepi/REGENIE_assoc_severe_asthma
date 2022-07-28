@@ -11,20 +11,20 @@ library(tidyverse)
 
 #load input:
 path_prefix_1 <- "/home/n/nnp5/PhD/PhD_project/UKBiobank_datafields/data/"
-path_prefix_2 <- "/home/n/nnp5/PhD/PhD_project/UKBiobank_asthmaMeds_stratification/data/"
+path_prefix_2 <- "//data/gen1/UKBiobank_500K/severe_asthma/Noemi_PhD/data/"
 output_prefix <- "/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/data/"
 
 demo_file <- paste0(path_prefix_1,"demographics.txt")
 
 demo <- fread(demo_file,sep="\t")
 
-severe <- fread(paste0(path_prefix_2,"Eid_severe_intersection"),header=F)
-colnames(severe)[1] <- "eid"
-severe$cases <- as.factor("1")
+diff_to_treat <- fread(paste0(path_prefix_2,"eid_bts2019_4plus"),header=F)
+colnames(diff_to_treat)[1] <- "eid"
+diff_to_treat$cases <- as.factor("1")
 
-demo <- left_join(demo,severe,by="eid")
+demo <- left_join(demo,diff_to_treat,by="eid")
 
-
+#create pheno cols:
 demo <- demo %>% mutate(pheno = case_when(controls == 1 ~ 0, cases == 1 ~ 1))
 demo$pheno <- as.factor(demo$pheno)
 
@@ -68,5 +68,25 @@ write.table(sample_demo,paste0(output_prefix,"demo_pheno_cov.txt"),
 row.names = FALSE, col.names = TRUE ,quote=FALSE, sep=" ", na = "NA")
 
 sample_demo_EUR <- sample_demo %>% filter(clustered.ethnicity == 'European')
+cases_sample_demo_EUR <- sample_demo_EUR%>% filter(pheno == 1)
+
+female_cases_count <- as.numeric(summary(as.factor(cases_sample_demo_EUR$genetic_sex))[1])*5
+male_cases_count <- as.numeric(summary(as.factor(cases_sample_demo_EUR$genetic_sex))[2])*5
+
+controls_sample_demo_EUR <- sample_demo_EUR%>% filter(pheno == 0)
+
+female_controls_sample_demo_EUR <- controls_sample_demo_EUR %>% filter(genetic_sex == 0)
+female_controls_sample_demo_EUR <- female_controls_sample_demo_EUR[1:female_cases_count,1]
+
+male_controls_sample_demo_EUR <- controls_sample_demo_EUR %>% filter(genetic_sex == 1)
+male_controls_sample_demo_EUR <- male_controls_sample_demo_EUR[1:male_cases_count,1]
+controls_eid <- rbind(male_controls_sample_demo_EUR,female_controls_sample_demo_EUR)
+
+#pheno in EUR with case:control ratio 1:5 :
+sample_demo_EUR <- sample_demo_EUR %>% mutate(pheno_1_5_ratio = ifelse(sample_demo_EUR$FID %in% controls_eid$FID, 0,
+                                                                ifelse(sample_demo_EUR$cases == 1, 1, "NA")))
+
+summary(as.factor(sample_demo_EUR$pheno_1_5_ratio)) # ok, these are the number we want
+
 write.table(sample_demo_EUR,paste0(output_prefix,"demo_EUR_pheno_cov.txt"),
 row.names = FALSE, col.names = TRUE ,quote=FALSE, sep=" ", na = "NA")
