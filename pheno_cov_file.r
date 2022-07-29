@@ -11,18 +11,11 @@ library(tidyverse)
 
 #load input:
 path_prefix_1 <- "/home/n/nnp5/PhD/PhD_project/UKBiobank_datafields/data/"
-path_prefix_2 <- "//data/gen1/UKBiobank_500K/severe_asthma/Noemi_PhD/data/"
 output_prefix <- "/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/data/"
 
 demo_file <- paste0(path_prefix_1,"demographics.txt")
 
 demo <- fread(demo_file,sep="\t")
-
-diff_to_treat <- fread(paste0(path_prefix_2,"eid_bts2019_4plus"),header=F)
-colnames(diff_to_treat)[1] <- "eid"
-diff_to_treat$cases <- as.factor("1")
-
-demo <- left_join(demo,diff_to_treat,by="eid")
 
 #create pheno cols:
 demo <- demo %>% mutate(pheno = case_when(controls == 1 ~ 0, cases == 1 ~ 1))
@@ -82,7 +75,7 @@ male_controls_sample_demo_EUR <- controls_sample_demo_EUR %>% filter(genetic_sex
 male_controls_sample_demo_EUR <- male_controls_sample_demo_EUR[1:male_cases_count,1]
 controls_eid <- rbind(male_controls_sample_demo_EUR,female_controls_sample_demo_EUR)
 
-#pheno in EUR with case:control ratio 1:5 :
+#pheno in EUR with case:control ratio 1:5 and primary prescription:
 sample_demo_EUR <- sample_demo_EUR %>% mutate(pheno_1_5_ratio = ifelse(sample_demo_EUR$FID %in% controls_eid$FID, 0,
                                                                 ifelse(sample_demo_EUR$cases == 1, 1, "NA")))
 
