@@ -7,6 +7,7 @@ library(hablar)
 
 
 #load input
+path_prefix <- "/home/n/nnp5/PhD/PhD_project/UKBiobank_asthmaMeds_stratification/"
 demo <- read.table("/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/data/demo_EUR_pheno_cov.txt",header=T,sep=" ")
 demo$eid <- as.factor(demo$eid)
 demo <- demo %>% rename(clustered_ancestry = clustered.ethnicity)
@@ -88,7 +89,6 @@ df %>%
 ggsave(paste0("data/EUR_case_control_",as.character(colnames(df)[2]),"_plot.png"))
 
 #hospitalisation:
-path_prefix <- "/home/n/nnp5/PhD/PhD_project/UKBiobank_asthmaMeds_stratification/"
 hesin <- read.table(paste0(path_prefix,"data/QC_hesin_diag_asthma.txt"),sep="\t",header=TRUE) %>%
          select(app56607_ids, level) %>% unique()
 colnames(hesin) <- c("eid","hesin")
@@ -98,9 +98,6 @@ hesin$hesin <- as.factor(hesin$hesin)
 demo_hesin <- left_join(demo,hesin,by="eid")
 df <- demo_hesin %>% select(pheno_1_5_ratio,hesin)
 categorical_plot(df,as.character(colnames(df)[2]))
-
-
-
 
 
 ##Plot numeric variables:
@@ -201,106 +198,177 @@ demo <- demo %>% mutate(ubiopred_smk = ifelse((demo$pack_per_year_threshold == "
                                                       ifelse(demo$smoking_status == 2, "smoker",
                                                       ifelse(demo$pack_per_year_threshold == "equal_or_more_than_5" & demo$smoking_status == 1, "smoker", NA))))
 
-table(demo$pheno_1_5_ratio,demo$ubiopred_smk,exclude = NULL)
 df <- demo %>% select(pheno_1_5_ratio,ubiopred_smk)
 df$ubiopred_smk <- as.factor(df$ubiopred_smk)
 categorical_plot(df,as.character(colnames(df)[2]))
 
+#Prednisolone use:
+eid_pred <- fread(paste0(path_prefix,"data/all_UKBB_with_prednisolone_gp_scripts_edit"))
+eid_scripts <- fread(paste0(path_prefix,"data/all_UKBB_with_any_gp_scripts_edit"))
+eid_pred$pred_use <- as.factor(1)
+eid_scripts$scripts <- as.factor(1)
+eid_pred$V1 <- as.factor(eid_pred$V1)
+eid_scripts$V1 <- as.factor(eid_scripts$V1)
+eid_script_pred <- left_join(eid_scripts,eid_pred,by="V1")
+eid_script_pred <- eid_script_pred %>% mutate(pred_use = ifelse(is.na(eid_script_pred$pred_use), 0, 1))
+colnames(eid_script_pred)[1] <- "eid"
+eid_script_pred$eid <- as.factor(eid_script_pred$eid)
+eid_script_pred <- eid_script_pred %>% select(eid,pred_use)
+demo <- left_join(demo,eid_script_pred,by="eid")
+
 #Find number for descriptive table:
 #case-control:
+print("Cases-control")
 summary(demo$pheno_1_5_ratio)
+prop.table(table(demo$pheno_1_5_ratio))
 
 cases <- demo %>% filter(pheno_1_5_ratio == 1)
 controls <- demo %>% filter(pheno_1_5_ratio == 0)
 
+print("Summary statistics - cases and controls")
+
 #sex:
-summary(as.factor(cases$genetic_sex),exclude=NULL)
-prop.table(table(cases$genetic_sex))
-summary(as.factor(controls$genetic_sex),exclude=NULL)
-prop.table(table(controls$genetic_sex))
+print("Sex : count and percentage")
+print("Cases")
+table(cases$genetic_sex,exclude=NULL)
+prop.table(table(cases$genetic_sex,exclude=NULL))
+print("Controls")
+table(controls$genetic_sex,exclude=NULL)
+prop.table(table(controls$genetic_sex,exclude=NULL))
 
 #age : mean and SD:
+print("Age: mean and SD")
+print("Cases")
 mean(cases$age_at_recruitment,na.rm=TRUE)
 sd(cases$age_at_recruitment,na.rm=TRUE)
+print("Controls")
 mean(controls$age_at_recruitment,na.rm=TRUE)
 sd(controls$age_at_recruitment,na.rm=TRUE)
 
 #BMI : mean and SD:
+print("BMI: mean and SD")
+print("Cases")
 mean(cases$BMI,na.rm=TRUE)
 sd(cases$BMI,na.rm=TRUE)
+print("Controls")
 mean(controls$BMI,na.rm=TRUE)
 sd(controls$BMI,na.rm=TRUE)
 
 
 #LF : mean and SD:
 ##FEV1 % predicted
+print("FEV1 % predicted: mean and SD")
 df <- cases %>% filter(!is.na(perc_pred_FEV1))
 df <- remove_outliers(df, 'perc_pred_FEV1')
+print("Cases")
 mean(df$perc_pred_FEV1)
 sd(df$perc_pred_FEV1)
 
 df <- controls %>% filter(!is.na(perc_pred_FEV1))
 df <- remove_outliers(df, 'perc_pred_FEV1')
+print("Controls")
 mean(df$perc_pred_FEV1)
 sd(df$perc_pred_FEV1)
 
 
 ##FEV1/FVC:
+print("FEV1/FVC: mean and SD")
 df <- cases %>% filter(!is.na(ratio_FEV1_FVC))
 df <- remove_outliers(df, 'ratio_FEV1_FVC')
+print("Cases")
 mean(df$ratio_FEV1_FVC)
 sd(df$ratio_FEV1_FVC)
 
 df <- controls %>% filter(!is.na(ratio_FEV1_FVC))
 df <- remove_outliers(df, 'ratio_FEV1_FVC')
+print("Controls")
 mean(df$ratio_FEV1_FVC)
 sd(df$ratio_FEV1_FVC)
 
 
 ##Best FEV1
+print("Best FEV1: mean and SD")
 df <- cases %>% filter(!is.na(best_FEV1))
 df <- remove_outliers(df, 'best_FEV1')
+print("Cases")
 mean(df$best_FEV1)
 sd(df$best_FEV1)
 
 df <- controls %>% filter(!is.na(best_FEV1))
 df <- remove_outliers(df, 'best_FEV1')
+print("Controls")
 mean(df$best_FEV1)
 sd(df$best_FEV1)
 
 ##blood cell count
 #eosinophil:
+print("Eosinophils: mean and SD")
 demo_eos_cases <- demo_eos %>% filter(pheno_1_5_ratio == 1)
 df <- demo_eos_cases %>% filter(!is.na(max_eos))
 df <- remove_outliers(df, 'max_eos')
+print("Cases")
 mean(df$max_eos)
 sd(df$max_eos)
 
 demo_eos_controls <- demo_eos %>% filter(pheno_1_5_ratio == 0)
 df <- demo_eos_controls %>% filter(!is.na(max_eos))
 df <- remove_outliers(df, 'max_eos')
+print("Controls")
 mean(df$max_eos)
 sd(df$max_eos)
 
 #neutrophils:
+print("Neutrophils: mean and SD")
 demo_neu_cases <- demo_neu %>% filter(pheno_1_5_ratio == 1)
 df <- demo_neu_cases %>% filter(!is.na(max_neu))
 df <- remove_outliers(df, 'max_neu')
+print("Cases")
 mean(df$max_neu)
 sd(df$max_neu)
 
 demo_neu_controls <- demo_neu %>% filter(pheno_1_5_ratio == 0)
 df <- demo_neu_controls %>% filter(!is.na(max_neu))
 df <- remove_outliers(df, 'max_neu')
+print("Controls")
 mean(df$max_neu)
 sd(df$max_neu)
 
-#hospitalisation:
-
+#Hospitalisation:
+print("Hospitalisation: count and percentage")
+demo_hesin_cases <- left_join(demo,hesin,by="eid") %>% filter(pheno_1_5_ratio == 1)
+print("Cases")
+table(demo_hesin_cases$hesin,exclude=NULL)
+prop.table(table(demo_hesin_cases$hesin,exclude=NULL))
+print("Controls")
+demo_hesin_controls <- left_join(demo,hesin,by="eid") %>% filter(pheno_1_5_ratio == 0)
+table(demo_hesin_controls$hesin,exclude=NULL)
+prop.table(table(demo_hesin_controls$hesin,exclude=NULL))
 
 #Smoking status (ubiopred):
-
-#Prednisolone use:
+print("Smoking status (ubiopred): count and percentage")
+print("Cases")
+table(cases$ubiopred_smk,exclude=NULL)
+prop.table(table(cases$ubiopred_smk,exclude=NULL))
+print("Controls")
+table(controls$ubiopred_smk,exclude=NULL)
+prop.table(table(controls$ubiopred_smk,exclude=NULL))
 
 
 #Category onset:
+print("Category onset: count and percentage")
+print("Cases")
+table(cases$category_onset,exclude = NULL)
+prop.table(table(cases$category_onset,exclude = NULL))
+print("Controls")
+table(controls$category_onset,exclude = NULL)
+prop.table(table(controls$category_onset,exclude = NULL))
+
+
+#Prednisolone use:
+print("Prednisolone use: count and percentage")
+print("Cases")
+table(cases$pred_use,exclude = NULL)
+prop.table(table(cases$pred_use,exclude = NULL))
+print("Controls")
+table(controls$pred_use,exclude = NULL)
+prop.table(table(controls$pred_use,exclude = NULL))
