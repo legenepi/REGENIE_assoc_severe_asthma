@@ -3,7 +3,7 @@
 #PBS -N regenie2
 #PBS -j oe
 #PBS -o log
-#PBS -l walltime=72:0:0
+#PBS -l walltime=27:0:0
 #PBS -l nodes=1:ppn=4
 #PBS -l vmem=64gb
 #PBS -W umask=022
