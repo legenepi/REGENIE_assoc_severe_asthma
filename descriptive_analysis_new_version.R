@@ -256,3 +256,8 @@ pheno_ratio_FEV1_FVC_boxplot <- pheno_ratio_FEV1_FVC %>% ggplot(aes(pheno,ratio_
                       axis.title.y = element_text(size = 16), axis.title.x = element_text(size = 16),
                       legend.title = element_text(size = 16), legend.text = element_text(size = 15))
 ggsave("data/pheno_ratio_FEV1_FVC_boxplot.png",pheno_ratio_FEV1_FVC_boxplot,width=20)
+
+
+#SEX vs BMI:
+
+#BMI vs age-onset:

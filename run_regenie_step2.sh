@@ -3,7 +3,7 @@
 #PBS -N regenie2
 #PBS -j oe
 #PBS -o log
-#PBS -l walltime=27:0:0
+#PBS -l walltime=11:0:0
 #PBS -l nodes=1:ppn=4
 #PBS -l vmem=64gb
 #PBS -W umask=022
@@ -29,7 +29,7 @@ regenie \
   --sample ${sample_DIR}/ukbiobank_app56607_for_regenie.sample \
   --keep ${scratch_DIR}/ukb_cal_allchr_eur_qc.id \
   --phenoFile ${PATH_DATA}/demo_EUR_pheno_cov.txt \
-  --phenoCol pheno \
+  --phenoCol ${pheno} \
   --covarFile ${PATH_DATA}/demo_EUR_pheno_cov.txt \
   --covarColList age_at_recruitment,age2,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10,sex,genetic_sex \
   --bt \
