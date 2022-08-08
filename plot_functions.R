@@ -1,9 +1,9 @@
 #Plot inflation plot with qqman package and qq() function.
 plot.qqplot <- function(pval_vec,title){
-	       filename = paste0("output/Q-Q_plot_of_GWAS",title,".png")
-	       plot_title = paste0("Q-Q plot of GWAS ",title)
+	       filename = paste0("output/Q-Q_plot_",title,".png")
+	       plot_title = paste0("Q-Q plot ",title)
 	       png(filename, width = 480, height = 480, units = "px", pointsize = 12, bg = "white")
-               print(qq(pval_vec, main = plot_title, xlim = c(0,8), ylim = c(0,8), cex.axis = 0.9, cex = 0.9, las = 1)) #function from qqman library
+               print(qq(pval_vec, main = plot_title, xlim = c(0,11), ylim = c(0,11), cex.axis = 0.9, cex = 0.9, las = 1)) #function from qqman library
                dev.off()
 
 }
@@ -12,10 +12,10 @@ plot.qqplot <- function(pval_vec,title){
 # a GEMMA association analysis.
 plot.Manha <- function (dataset,test_type,title) {
 	      colnames(dataset) <- c("SNP","CHR","BP","P") #the Manhattan function needs this format
-              filename <- paste0("output/Manhattan_plot_of_GWAS",title,".png")
-              plot_title = paste0("Manhattan plot of GWAS ",title)
-	      png(filename, width = 1200, height = 480, units = "px", pointsize = 12, bg = "white")
-	      manhattan(dataset, main = title, col = c("lightblue","blue3"), chrlabs = as.character(c(1:22)), ylim = c(0,9),
+              filename <- paste0("output/Manhattan_plot_",title,".png")
+              plot_title = paste0("Manhattan plot ",title)
+	      png(filename, width = 1800, height = 480, units = "px", pointsize = 12, bg = "white")
+	      manhattan(dataset, main = title, col = c("lightblue","blue3"), chrlabs = as.character(c(1:22)), ylim = c(0,13),
 	      cex = 0.9, cex.axis = 0.8, suggestiveline = F, genomewideline = F) #function from qqman library     
 	      abline(h=-log10(0.00000005),lty="dashed",col="black")
 	      abline(h=-log10(0.000005),lty="solid",col="black")
@@ -26,12 +26,13 @@ plot.Manha <- function (dataset,test_type,title) {
 
 
 
-# Estimate lambda using the genabel package and the estlambda function:
-lambda_func <- function(p_val,title){
-		filename <- paste0("output/lambda_",title,"_.txt")
-		z_frompval <- qnorm(pval/2)
-        lambda_values <- round(median(z_frompval^2,na.rm=T)/qchisq(0.5,df=1),4)
-		write.table(lambda_values,filename)
+#Estimate lambda using chisq:
+lambda_func <- function(chisq,title){
+		filename <- paste0("output/lambda_",title,".txt")
+        lambda_values <- round(median(chisq,na.rm=T)/qchisq(0.5,df=1),2)
+		write.table(lambda_values,filename,col.names="lambda",row.names=F)
+		return
+		lambda_values
 }
 
 

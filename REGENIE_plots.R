@@ -13,6 +13,7 @@ args = commandArgs(TRUE)
 #inputfile:
 input_file = args[1] #REGENIE result file
 pheno = args[2] #1_5_ratio_pheno #1_5_ratio_pheno_earlyonset #1_5_ratio_pheno_adultonset
+ldsc_intercept = as.numeric(args[3])
 #input_file <- "output/allchr/pheno_1_5_ratio_allchr.assoc.txt.gz"
 #input
 meta <- fread(input_file, header=T, fill=T)
@@ -36,13 +37,10 @@ plot.Manha(df, title = title_plot)
 #Lambda (inflation of genetic factor) from pval:
 lambda <- lambda_func(meta$CHISQ, title = title_plot)
 
-if (lambda >= 1.05) {
+if (ldsc_intercept >= 1.05) {
     print("Correct for lambda >= 1.05")
-    meta$se_gc <- meta$SE * sqrt(as.numeric(lambda))
-    #recalculate pval corrected with a two sided z-score : z-score=-abs(estimate/se_corrected). because under Ho a=0, so estimate-0=estimate
-    #-abs: because z-score should be always negative
+    meta$se_gc <- meta$SE * sqrt(as.numeric(ldsc_intercept))
     z <- -abs(meta$BETA/meta$se_gc)
-    #2*pnorm: two-sided test
     meta$pval_gc <- 2*pnorm(z)
     title_plot <- paste0("gc_GWAS_",pheno)
     #QQ plot:

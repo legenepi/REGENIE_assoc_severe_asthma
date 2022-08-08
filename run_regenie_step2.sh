@@ -31,7 +31,7 @@ regenie \
   --phenoFile ${PATH_DATA}/demo_EUR_pheno_cov.txt \
   --phenoCol ${pheno} \
   --covarFile ${PATH_DATA}/demo_EUR_pheno_cov.txt \
-  --covarColList age_at_recruitment,age2,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10,sex,genetic_sex \
+  --covarColList age_at_recruitment,age2,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10,PC11,PC12,PC13,PC14,PC15,PC16,PC17,PC18,PC19,PC20,sex,genetic_sex \
   --bt \
   --gz \
   --threads 4 \
