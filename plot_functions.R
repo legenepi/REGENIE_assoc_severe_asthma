@@ -3,7 +3,7 @@ plot.qqplot <- function(pval_vec,title){
 	       filename = paste0("output/Q-Q_plot_",title,".png")
 	       plot_title = paste0("Q-Q plot ",title)
 	       png(filename, width = 480, height = 480, units = "px", pointsize = 12, bg = "white")
-               print(qq(pval_vec, main = plot_title, xlim = c(0,11), ylim = c(0,11), cex.axis = 0.9, cex = 0.9, las = 1)) #function from qqman library
+               print(qq(pval_vec, main = plot_title, xlim = c(0,13), ylim = c(0,13), cex.axis = 0.9, cex = 0.9, las = 1)) #function from qqman library
                dev.off()
 
 }
@@ -14,7 +14,7 @@ plot.Manha <- function (dataset,test_type,title) {
 	      colnames(dataset) <- c("SNP","CHR","BP","P") #the Manhattan function needs this format
               filename <- paste0("output/Manhattan_plot_",title,".png")
               plot_title = paste0("Manhattan plot ",title)
-	      png(filename, width = 1800, height = 480, units = "px", pointsize = 12, bg = "white")
+	      png(filename, width = 1800, height = 550, units = "px", pointsize = 12, bg = "white")
 	      manhattan(dataset, main = title, col = c("lightblue","blue3"), chrlabs = as.character(c(1:22)), ylim = c(0,13),
 	      cex = 0.9, cex.axis = 0.8, suggestiveline = F, genomewideline = F) #function from qqman library     
 	      abline(h=-log10(0.00000005),lty="dashed",col="black")
@@ -26,13 +26,14 @@ plot.Manha <- function (dataset,test_type,title) {
 
 
 
-#Estimate lambda using chisq:
-lambda_func <- function(chisq,title){
+#Estimate lambda using pval:
+lambda_func <- function(pval,title){
 		filename <- paste0("output/lambda_",title,".txt")
-        lambda_values <- round(median(chisq,na.rm=T)/qchisq(0.5,df=1),2)
-		write.table(lambda_values,filename,col.names="lambda",row.names=F)
+		pval <- qnorm(pval/2)
+        lambda_frompval = round(median(pval^2,na.rm=T)/qchisq(0.5,df=1),2)
+		write.table(lambda_frompval,filename,col.names="lambda",row.names=F)
 		return
-		lambda_values
+		lambda_frompval
 }
 
 

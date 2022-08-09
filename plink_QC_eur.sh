@@ -30,12 +30,16 @@ scratch_dir="/scratch/gen1/nnp5/REGENIE_assoc/tmp_data"
 #	--bim ${geno_dir}/ukb_cal_chr1_v2.bim \
 #	--fam ${PATH_DATA}/ukb56607_cal_chr1_v2_s488239.fam \
 #	--merge-list ${PATH_DATA}/list_plink_files \
-#	--make-bed --out ${scratch_dir}/ukb_cal_allchr_v2
+#	--make-bed --out ${scratch_dir}/ukb_cal_allchr_v2 &&
+
+awk '{print $1, $1}' /home/n/nnp5/PhD/PhD_project/UKBiobank_datafields/data/Eid_withdrawn_participants_upFeb2022.txt \
+    > ${PATH_DATA}/ukb_withdrawns_ids &&
 
 module load plink2
 plink2 --bfile ${scratch_dir}/ukb_cal_allchr_v2 \
 	--maf 0.01 --mac 100 --geno 0.1 --hwe 1e-15 \
 	--keep ${PATH_DATA}/ukb_eur_ids \
+	--remove ${PATH_DATA}/ukb_withdrawns_ids \
 	--mind 0.1 \
 	--write-snplist --write-samples --no-id-header \
 	--out ${scratch_dir}/ukb_cal_allchr_eur_qc

@@ -61,12 +61,12 @@ write.table(sample_demo,paste0(output_prefix,"demo_pheno_cov.txt"),
 row.names = FALSE, col.names = TRUE ,quote=FALSE, sep=" ", na = "NA")
 
 sample_demo_EUR <- sample_demo %>% filter(clustered.ethnicity == 'European')
-cases_sample_demo_EUR <- sample_demo_EUR%>% filter(pheno == 1)
+cases_sample_demo_EUR <- sample_demo_EUR %>% filter(pheno == 1)
 
 female_cases_count <- as.numeric(summary(as.factor(cases_sample_demo_EUR$genetic_sex))[1])*5
 male_cases_count <- as.numeric(summary(as.factor(cases_sample_demo_EUR$genetic_sex))[2])*5
 
-controls_sample_demo_EUR <- sample_demo_EUR%>% filter(pheno == 0)
+controls_sample_demo_EUR <- sample_demo_EUR %>% filter(pheno == 0)
 
 female_controls_sample_demo_EUR <- controls_sample_demo_EUR %>% filter(genetic_sex == 0)
 female_controls_sample_demo_EUR <- female_controls_sample_demo_EUR[1:female_cases_count,1]

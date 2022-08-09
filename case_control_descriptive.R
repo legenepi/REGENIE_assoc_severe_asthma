@@ -18,7 +18,7 @@ demo <- demo %>% filter(!is.na(pheno_1_5_ratio))
 
 
 ##Plot categorical variables:
-categorical_plot <- function(df,cat_var){
+categorical_plot <- function(df,cat_var,xlab_name){
 colnames(df) <- c("Phenotype","cat_var")
 df %>%
   count(Phenotype,cat_var) %>%
@@ -27,6 +27,7 @@ df %>%
   ggplot() + aes(Phenotype, pct, fill=cat_var) +
   geom_bar(stat="identity") +
   ylab("Frequency") +
+  xlab(paste0(xlab_name)) +
   geom_text(aes(label=paste0(sprintf("%1.1f", pct),"%")),
             position=position_stack(vjust=0.5), size = 7) +
   scale_fill_manual(name=cat_var,values= c("#5d8aa8","#89cff0","#f0f8ff")) +
@@ -39,18 +40,18 @@ ggsave(paste0("data/EUR_case_control_",cat_var,"_plot.png"))
 
 df <- demo %>% select(pheno_1_5_ratio,genetic_sex)
 df$genetic_sex <- as.factor(df$genetic_sex)
-categorical_plot(df,as.character(colnames(df)[2]))
+categorical_plot(df,as.character(colnames(df)[2]),"Severe Asthma")
 
 df <- demo %>% select(pheno_1_5_ratio,sex)
 df$sex <- as.factor(df$sex)
-categorical_plot(df,as.character(colnames(df)[2]))
+categorical_plot(df,as.character(colnames(df)[2]),"Severe Asthma")
 
 df <- demo %>% select(pheno_1_5_ratio,sex_sample_file)
 df$sex_sample_file <- as.factor(df$sex_sample_file)
-categorical_plot(df,as.character(colnames(df)[2]))
+categorical_plot(df,as.character(colnames(df)[2]),"Severe Asthma")
 
 df <- demo %>% select(pheno_1_5_ratio,category_onset)
-categorical_plot(df,as.character(colnames(df)[2]))
+categorical_plot(df,as.character(colnames(df)[2]),"Severe Asthma")
 
 df <- demo %>% select(pheno_1_5_ratio,smoking_status)
 colnames(df) <- c("Phenotype","smoking_status")
@@ -61,6 +62,7 @@ df %>%
   ggplot() + aes(Phenotype, pct, fill=smoking_status) +
   geom_bar(stat="identity") +
   ylab("Frequency") +
+  xlab("Severe Asthma") +
   geom_text(aes(label=paste0(sprintf("%1.1f", pct),"%")),
             position=position_stack(vjust=0.5), size = 7) +
   scale_fill_manual(name=as.character(colnames(df)[2]),values=c("#5d8aa8","#89cff0","#f0f8ff","#7fffd4")) +
@@ -79,6 +81,7 @@ df %>%
   ggplot() + aes(Phenotype, pct, fill=clustered_ancestry) +
   geom_bar(stat="identity") +
   ylab("Frequency") +
+  xlab("Severe Asthma") +
   geom_text(aes(label=paste0(sprintf("%1.1f", pct),"%")),
             position=position_stack(vjust=0.5), size = 7) +
   scale_fill_manual(name=as.character(colnames(df)[2]),values=c("#5d8aa8","#89cff0","#f0f8ff","#7fffd4","#ab82ff","#6495ed","#8470ff")) +
@@ -97,7 +100,7 @@ hesin$hesin <- as.factor(hesin$hesin)
 
 demo_hesin <- left_join(demo,hesin,by="eid")
 df <- demo_hesin %>% select(pheno_1_5_ratio,hesin)
-categorical_plot(df,as.character(colnames(df)[2]))
+categorical_plot(df,as.character(colnames(df)[2]),"Severe Asthma")
 
 
 ##Plot numeric variables:
@@ -122,7 +125,7 @@ remove_outliers <- function(df, cols = names(df)) {
 }
 
 #df with cols: category (lancet or our), LF.
-numeric_plot <- function(df,num_var){
+numeric_plot <- function(df,num_var,xlab_name){
 colnames(df) <- c("Phenotype","num_var")
 df <- df %>% filter(!is.na(num_var))
 df <- remove_outliers(df, 'num_var')
@@ -131,6 +134,7 @@ df %>%
      ggplot(aes(Phenotype,num_var)) +
      geom_boxplot() +
      ylab(paste0(num_var, "- QC LF")) +
+     xlab(paste0(xlab_name)) +
      theme_classic() +
      geom_text(data = means, aes(label = round(num_var,2), y = 0, fontface = "bold"), size = 5) +
      theme(axis.text.x = element_text(size = 15), axis.text.y = element_text(size = 15), axis.title.y = element_text(size = 16), axis.title.x = element_text(size = 16))
@@ -138,22 +142,22 @@ ggsave(paste0("data/EUR_case_control_",num_var,"_plot.png"))
 }
 
 df <- demo %>% select(pheno_1_5_ratio, perc_pred_FEV1)
-numeric_plot(df, as.character(colnames(df)[2]))
+numeric_plot(df, as.character(colnames(df)[2]),"Severe Asthma")
 
 df <- demo %>% select(pheno_1_5_ratio, ratio_FEV1_FVC)
-numeric_plot(df, as.character(colnames(df)[2]))
+numeric_plot(df, as.character(colnames(df)[2]),"Severe Asthma")
 
 df <- demo %>% select(pheno_1_5_ratio,best_FEV1)
-numeric_plot(df, as.character(colnames(df)[2]))
+numeric_plot(df, as.character(colnames(df)[2]),"Severe Asthma")
 
 df <- demo %>% select(pheno_1_5_ratio,BMI)
-numeric_plot(df, as.character(colnames(df)[2]))
+numeric_plot(df, as.character(colnames(df)[2]),"Severe Asthma")
 
 df <- demo %>% select(pheno_1_5_ratio,age_at_recruitment)
-numeric_plot(df, as.character(colnames(df)[2]))
+numeric_plot(df, as.character(colnames(df)[2]),"Severe Asthma")
 
 df <- demo %>% select(pheno_1_5_ratio,cigarette_pack_years)
-numeric_plot(df, as.character(colnames(df)[2]))
+numeric_plot(df, as.character(colnames(df)[2]),"Severe Asthma")
 
 #eosinophil:
 eos <- fread(paste0(path_prefix,"data/Eosinophill_count_30150.csv"))
@@ -168,7 +172,7 @@ demo_eos <- demo_eos %>%
          max_eos = max_(c_across(-pheno_1_5_ratio)))
 
 df <- demo_eos %>% select(pheno_1_5_ratio,max_eos)
-numeric_plot(df, as.character(colnames(df)[2]))
+numeric_plot(df, as.character(colnames(df)[2]),"Severe Asthma")
 
 #neutrophil:
 neu <- fread(paste0(path_prefix,"data/Neutrophill_count_30140.csv"))
@@ -183,7 +187,7 @@ demo_neu <- demo_neu %>%
          max_neu = max_(c_across(-pheno_1_5_ratio)))
 
 df <- demo_neu %>% select(pheno_1_5_ratio,max_neu)
-numeric_plot(df, as.character(colnames(df)[2]))
+numeric_plot(df, as.character(colnames(df)[2]),"Severe Asthma")
 
 
 #smoking as per ubiopred:
@@ -200,7 +204,7 @@ demo <- demo %>% mutate(ubiopred_smk = ifelse((demo$pack_per_year_threshold == "
 
 df <- demo %>% select(pheno_1_5_ratio,ubiopred_smk)
 df$ubiopred_smk <- as.factor(df$ubiopred_smk)
-categorical_plot(df,as.character(colnames(df)[2]))
+categorical_plot(df,as.character(colnames(df)[2]),"Severe Asthma")
 
 #Prednisolone use:
 eid_pred <- fread(paste0(path_prefix,"data/all_UKBB_with_prednisolone_gp_scripts_edit"))
@@ -372,3 +376,24 @@ prop.table(table(cases$pred_use,exclude = NULL))
 print("Controls")
 table(controls$pred_use,exclude = NULL)
 prop.table(table(controls$pred_use,exclude = NULL))
+
+#Percent predicted FEV1 by prednisolone use:
+df <- demo %>% filter(pheno_1_5_ratio == 1) %>% select(pred_use, perc_pred_FEV1) %>% rename(perc_pred_FEV1_by_pred_use=perc_pred_FEV1)
+df$pred_use <- as.factor(df$pred_use)
+numeric_plot(df, as.character(colnames(df)[2]),"Prednisolone use")
+
+#ratio_FEV1_FVC by prednisolone use:
+df <- demo %>% filter(pheno_1_5_ratio == 1) %>% select(pred_use, ratio_FEV1_FVC) %>% rename(ratio_FEV1_FVC_by_pred_use=ratio_FEV1_FVC)
+df$pred_use <- as.factor(df$pred_use)
+numeric_plot(df, as.character(colnames(df)[2]),"Prednisolone use")
+
+#Best_FEV1 by prednisolone use:
+df <- demo %>% filter(pheno_1_5_ratio == 1) %>% select(pred_use, best_FEV1) %>% rename(best_FEV1_by_pred_use=best_FEV1)
+df$pred_use <- as.factor(df$pred_use)
+numeric_plot(df, as.character(colnames(df)[2]),"Prednisolone use")
+
+#hesin by prednisolone use:
+demo_hesin <- left_join(demo,hesin,by="eid")
+df <- demo_hesin %>% filter(pheno_1_5_ratio == 1) %>% select(pred_use, hesin) %>% rename(hesin_by_pred_use=hesin)
+df$pred_use <- as.factor(df$pred_use)
+categorical_plot(df,as.character(colnames(df)[2]),"Prednisolone use")
