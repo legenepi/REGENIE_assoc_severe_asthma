@@ -11,10 +11,10 @@ args = commandArgs(TRUE)
 
 
 #inputfile:
-input_file = args[1] #REGENIE result file
+input_file = args[1] #input mungestat file
 pheno = args[2] #1_5_ratio_pheno #1_5_ratio_pheno_earlyonset #1_5_ratio_pheno_adultonset
 ldsc_intercept = as.numeric(args[3])
-#input_file <- "output/allchr/pheno_1_5_ratio_allchr.assoc.txt.gz"
+#input_file <- "output/pheno_1_5_ratio_betase_input_mungestat"
 #input
 meta <- fread(input_file, header=T, fill=T)
 
@@ -22,12 +22,12 @@ title_plot <- paste0("GWAS_",pheno)
 
 
 #QQ plot with qqman package: one genome-wide for each test-statistic p-val:
-plot.qqplot(pval_vec = meta$LOG10P, title= title_plot)
+plot.qqplot(pval_vec = meta$pval, title= title_plot)
 
 
 #Manhattan plot:
 # require these columns: rs,chr,ps,pval
-df <- meta %>% select(ID,CHROM,GENPOS,LOG10P)
+df <- meta %>% select(snpid,b37chr,bp,pval)
 colnames(df) <- c("rs","chr","ps","pval")
 df$chr <- as.numeric(df$chr)
 df$ps <- as.numeric(df$ps)
@@ -35,7 +35,7 @@ plot.Manha(df, title = title_plot)
 
 
 #Lambda (inflation of genetic factor) from pval:
-lambda <- lambda_func(meta$CHISQ, title = title_plot)
+lambda <- lambda_func(meta$pval, title = title_plot)
 
 if (ldsc_intercept >= 1.05) {
     print("Correct for lambda >= 1.05")
@@ -44,7 +44,7 @@ if (ldsc_intercept >= 1.05) {
     meta$pval_gc <- 2*pnorm(z)
     title_plot <- paste0("gc_GWAS_",pheno)
     #QQ plot:
-    #plot.qqplot(pval_vec = meta$pval_gc, title= title_plot)
+    plot.qqplot(pval_vec = meta$pval_gc, title= title_plot)
     #Manhattan plot:
     df <- meta %>% select(ID,CHROM,GENPOS,pval_gc)
     colnames(df) <- c("rs","chr","ps","pval")

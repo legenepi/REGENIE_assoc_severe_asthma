@@ -3,9 +3,9 @@
 #PBS -N regenie1
 #PBS -j oe
 #PBS -o log
-#PBS -l walltime=23:0:0
+#PBS -l walltime=15:0:0
 #PBS -l nodes=1:ppn=4
-#PBS -l vmem=64gb
+#PBS -l vmem=50gb
 #PBS -W umask=022
 
 PATH_DATA="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/data"

@@ -100,7 +100,7 @@ hesin$hesin <- as.factor(hesin$hesin)
 
 demo_hesin <- left_join(demo,hesin,by="eid")
 df <- demo_hesin %>% select(pheno_1_5_ratio,hesin)
-categorical_plot(df,as.character(colnames(df)[2]),"Severe Asthma")
+categorical_plot(df,as.character(colnames(df)[2]),"Difficult-to-treat")
 
 
 ##Plot numeric variables:
@@ -142,22 +142,22 @@ ggsave(paste0("data/EUR_case_control_",num_var,"_plot.png"))
 }
 
 df <- demo %>% select(pheno_1_5_ratio, perc_pred_FEV1)
-numeric_plot(df, as.character(colnames(df)[2]),"Severe Asthma")
+numeric_plot(df, as.character(colnames(df)[2]),"Difficult-to-treat")
 
 df <- demo %>% select(pheno_1_5_ratio, ratio_FEV1_FVC)
-numeric_plot(df, as.character(colnames(df)[2]),"Severe Asthma")
+numeric_plot(df, as.character(colnames(df)[2]),"Difficult-to-treat")
 
 df <- demo %>% select(pheno_1_5_ratio,best_FEV1)
-numeric_plot(df, as.character(colnames(df)[2]),"Severe Asthma")
+numeric_plot(df, as.character(colnames(df)[2]),"Difficult-to-treat")
 
 df <- demo %>% select(pheno_1_5_ratio,BMI)
-numeric_plot(df, as.character(colnames(df)[2]),"Severe Asthma")
+numeric_plot(df, as.character(colnames(df)[2]),"Difficult-to-treat")
 
 df <- demo %>% select(pheno_1_5_ratio,age_at_recruitment)
-numeric_plot(df, as.character(colnames(df)[2]),"Severe Asthma")
+numeric_plot(df, as.character(colnames(df)[2]),"Difficult-to-treat")
 
 df <- demo %>% select(pheno_1_5_ratio,cigarette_pack_years)
-numeric_plot(df, as.character(colnames(df)[2]),"Severe Asthma")
+numeric_plot(df, as.character(colnames(df)[2]),"Difficult-to-treat")
 
 #eosinophil:
 eos <- fread(paste0(path_prefix,"data/Eosinophill_count_30150.csv"))
@@ -172,7 +172,7 @@ demo_eos <- demo_eos %>%
          max_eos = max_(c_across(-pheno_1_5_ratio)))
 
 df <- demo_eos %>% select(pheno_1_5_ratio,max_eos)
-numeric_plot(df, as.character(colnames(df)[2]),"Severe Asthma")
+numeric_plot(df, as.character(colnames(df)[2]),"Difficult-to-treat")
 
 #neutrophil:
 neu <- fread(paste0(path_prefix,"data/Neutrophill_count_30140.csv"))
@@ -187,7 +187,7 @@ demo_neu <- demo_neu %>%
          max_neu = max_(c_across(-pheno_1_5_ratio)))
 
 df <- demo_neu %>% select(pheno_1_5_ratio,max_neu)
-numeric_plot(df, as.character(colnames(df)[2]),"Severe Asthma")
+numeric_plot(df, as.character(colnames(df)[2]),"Difficult-to-treat")
 
 
 #smoking as per ubiopred:
@@ -204,7 +204,7 @@ demo <- demo %>% mutate(ubiopred_smk = ifelse((demo$pack_per_year_threshold == "
 
 df <- demo %>% select(pheno_1_5_ratio,ubiopred_smk)
 df$ubiopred_smk <- as.factor(df$ubiopred_smk)
-categorical_plot(df,as.character(colnames(df)[2]),"Severe Asthma")
+categorical_plot(df,as.character(colnames(df)[2]),"Difficult-to-treat")
 
 #Prednisolone use:
 eid_pred <- fread(paste0(path_prefix,"data/all_UKBB_with_prednisolone_gp_scripts_edit"))
@@ -397,3 +397,59 @@ demo_hesin <- left_join(demo,hesin,by="eid")
 df <- demo_hesin %>% filter(pheno_1_5_ratio == 1) %>% select(pred_use, hesin) %>% rename(hesin_by_pred_use=hesin)
 df$pred_use <- as.factor(df$pred_use)
 categorical_plot(df,as.character(colnames(df)[2]),"Prednisolone use")
+
+
+#Lung function from Kath file:
+bridge_app648_8389 <- fread("/data/gen1/UKBiobank/application_648/mapping_to_app8389.txt",header=T)
+bridge_app648_8389$app8389 <- as.character(bridge_app648_8389$app8389)
+bridge_app648_8389$app648 <- as.character(bridge_app648_8389$app648)
+#awk '{print $1, $52}' /data/gen1/UKBiobank_500K/severe_asthma/data/ukbiobank_master_app56607.sample \
+#    > /data/gen1/UKBiobank_500K/severe_asthma/data/bridge_app648_56607
+bridge_app648_56607 <- fread("/data/gen1/UKBiobank_500K/severe_asthma/data/bridge_app648_56607",sep=" ",header=T)
+colnames(bridge_app648_56607) <- c("app648","app56607")
+bridge_app648_56607$app56607 <- as.character(bridge_app648_56607$app56607)
+bridge_app648_56607$app648 <- as.character(bridge_app648_56607$app648)
+bridge_648_8389_56607 <- inner_join(bridge_app648_8389,bridge_app648_56607,by="app648")
+
+perc_pred_fev1_kath <- fread("/data/gen1/UKBiobank_500K/severe_asthma/data/percent_pred_fev1.txt",header=T)
+fev1_fvc_kath <- fread("/data/gen1/UKBiobank_500K/severe_asthma/data/ff.txt",header=T)
+LF_kath <- inner_join(perc_pred_fev1_kath,fev1_fvc_kath,by="ID_1") %>% rename(app648=ID_1)
+LF_kath$app648 <- as.character(LF_kath$app648)
+LF_kath_app56607 <- left_join(LF_kath, bridge_648_8389_56607, by="app648") %>% select(app56607,fev1_perc_pred,ff.best) %>% rename(eid=app56607)
+demo_LF_kath <- left_join(demo,LF_kath_app56607,by="eid")
+cases <- demo_LF_kath %>% filter(pheno_1_5_ratio == 1)
+controls <- demo_LF_kath %>% filter(pheno_1_5_ratio == 0)
+
+##fev1_perc_pred
+print("fev1_perc_pred (From Kath data): mean and SD")
+df <- cases %>% filter(!is.na(fev1_perc_pred))
+df <- remove_outliers(df, 'fev1_perc_pred')
+print("Cases")
+mean(df$fev1_perc_pred)
+sd(df$fev1_perc_pred)
+
+df <- controls %>% filter(!is.na(fev1_perc_pred))
+df <- remove_outliers(df, 'fev1_perc_pred')
+print("Controls")
+mean(df$fev1_perc_pred)
+sd(df$fev1_perc_pred)
+
+##ff.best
+print("ff.best (From Kath data): mean and SD")
+df <- cases %>% filter(!is.na(ff.best))
+df <- remove_outliers(df, 'ff.best')
+print("Cases")
+mean(df$ff.best)
+sd(df$ff.best)
+
+df <- controls %>% filter(!is.na(ff.best))
+df <- remove_outliers(df, 'ff.best')
+print("Controls")
+mean(df$ff.best)
+sd(df$ff.best)
+
+df <- demo_LF_kath %>% select(pheno_1_5_ratio, fev1_perc_pred)
+numeric_plot(df, as.character(colnames(df)[2]),"Difficult-to-treat")
+
+df <- demo_LF_kath %>% select(pheno_1_5_ratio, ff.best)
+numeric_plot(df, as.character(colnames(df)[2]),"Difficult-to-treat")

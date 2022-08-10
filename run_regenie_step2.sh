@@ -31,13 +31,13 @@ regenie \
   --phenoFile ${PATH_DATA}/demo_EUR_pheno_cov.txt \
   --phenoCol ${pheno} \
   --covarFile ${PATH_DATA}/demo_EUR_pheno_cov.txt \
-  --covarColList age_at_recruitment,age2,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10,sex,genetic_sex \
+  --covarColList age_at_recruitment,age2,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10,genetic_sex \
   --bt \
   --gz \
   --threads 4 \
   --minMAC 10 \
   --minINFO 0.3 \
-  --firth --approx \
+  --firth --approx --pThresh 0.01 \
   --pred ${OUT_DIR}/${pheno}.regenie.step1_pred.list \
   --bsize 1000 \
   --out ${OUT_DIR}/${pheno}.${chr}.regenie.step2
