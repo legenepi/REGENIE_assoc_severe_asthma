@@ -12,8 +12,6 @@ PATH_DATA="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/data"
 OUT_DIR="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output"
 scratch_dir="/scratch/gen1/nnp5/REGENIE_assoc/tmp_data"
 pheno="pheno_1_5_ratio"
-#pheno="pheno_adult"
-#pheno="pheno_early"
 
 module load regenie
 regenie \

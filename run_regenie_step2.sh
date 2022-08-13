@@ -14,8 +14,6 @@ OUT_DIR="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output"
 sample_DIR="/data/gen1/UKBiobank_500K/severe_asthma/data"
 scratch_DIR="/scratch/gen1/nnp5/REGENIE_assoc/tmp_data"
 pheno="pheno_1_5_ratio"
-#pheno="pheno_adult"
-#pheno="pheno_early"
 
 #run as: qsub -t 1-22 src/run_regenie_step2.sh
 
