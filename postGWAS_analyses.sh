@@ -3,8 +3,8 @@
 #PBS -N post_gwas_asthma
 #PBS -j oe
 #PBS -o post_gwas_asthma
-#PBS -l walltime=2:0:0
-#PBS -l vmem=30gb
+#PBS -l walltime=4:0:0
+#PBS -l vmem=50gb
 #PBS -l nodes=1:ppn=1
 #PBS -d .
 #PBS -W umask=022
@@ -23,27 +23,26 @@ GWAS="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/allchr"
 #    tail -n +2 \
 #    >> ${GWAS}/${PHENO}_allchr.assoc.txt
 #done
-#gzip ${GWAS}/${PHENO}_allchr.assoc.txt
-#rm ${GWAS}/${PHENO_allchr.assoc.txt
 
-tot_n='26601'
+#gzip ${GWAS}/${PHENO}_allchr.assoc.txt
+#rm ${GWAS}/${PHENO}_allchr.assoc.txt
+
 
 #module unload R/4.2.1
 #module load R/4.1.0
 #chmod o+x src/create_input_munge_summary_stats.R
 #dos2unix src/create_input_munge_summary_stats.R
 #Rscript src/create_input_munge_summary_stats.R \
-#   ${GWAS}/${PHENO}_allchr.assoc.txt.gz \
+#    ${GWAS}/${PHENO}_allchr.assoc.txt.gz \
 #    ${PHENO}
 
-###updated with info03. maf. mac filtering:
-#cd /home/n/nnp5/software ##create conda and downloand ldsc or via venv
-#git clone https://github.com/bulik/ldsc.git
-#cd ldsc
-#home/n/nnp5/anaconda/condabin/conda env create --file environment.yml
 
+#interactively:
+#cd /home/n/nnp5/software/ldsc
 
 #conda activate ldsc
+
+#tot_n='27408'
 
 #/home/n/nnp5/software/ldsc/munge_sumstats.py \
 #--sumstats ${PATH_OUT}/${PHENO}_betase_input_mungestat \
@@ -59,6 +58,8 @@ tot_n='26601'
 #--out ${PHENO}_allchr_step2_regenie_h2
 
 #conda deactivate
+
+cd /home/n/nnp5/PhD/PhD_project/REGENIE_assoc/
 
 ldsc_intercept='1.03'
 

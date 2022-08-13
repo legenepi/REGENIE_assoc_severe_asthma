@@ -3,7 +3,7 @@ plot.qqplot <- function(pval_vec,title){
 	       filename = paste0("output/Q-Q_plot_",title,".png")
 	       plot_title = paste0("Q-Q plot ",title)
 	       png(filename, width = 480, height = 480, units = "px", pointsize = 12, bg = "white")
-               print(qq(pval_vec, main = plot_title, xlim = c(0,13), ylim = c(0,13), cex.axis = 0.9, cex = 0.9, las = 1)) #function from qqman library
+               print(qq(pval_vec, main = plot_title, xlim = c(0,16), ylim = c(0,16), cex.axis = 0.9, cex = 0.9, las = 1)) #function from qqman library
                dev.off()
 
 }
@@ -15,7 +15,7 @@ plot.Manha <- function (dataset,test_type,title) {
               filename <- paste0("output/Manhattan_plot_",title,".png")
               plot_title = paste0("Manhattan plot ",title)
 	      png(filename, width = 1800, height = 550, units = "px", pointsize = 12, bg = "white")
-	      manhattan(dataset, main = title, col = c("lightblue","blue3"), chrlabs = as.character(c(1:22)), ylim = c(0,13),
+	      manhattan(dataset, main = title, col = c("lightblue","blue3"), chrlabs = as.character(c(1:22)), ylim = c(0,16),
 	      cex = 0.9, cex.axis = 0.8, suggestiveline = F, genomewideline = F) #function from qqman library     
 	      abline(h=-log10(0.00000005),lty="dashed",col="black")
 	      abline(h=-log10(0.000005),lty="solid",col="black")

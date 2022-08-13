@@ -456,10 +456,14 @@ numeric_plot(df, as.character(colnames(df)[2]),"Difficult-to-treat")
 
 ##Hay fever-rhinitis, eczema/atopic dermatitis:
 allergy <- fread("/home/n/nnp5/PhD/PhD_project/UKBiobank_datafields/data/eid_union_hayfev_rhinitis_eczema_derma_ATLEAST_1_evidence.txt",header=F)
+allergy <- unique(allergy)
+write.table(allergy,"/home/n/nnp5/PhD/PhD_project/UKBiobank_datafields/data/eid_union_hayfev_rhinitis_eczema_derma_ATLEAST_1_evidence.txt",quote=F,col.names=F,row.names=F)
 colnames(allergy)[1] <- "eid"
 allergy$eid <- as.character(allergy$eid)
 allergy$allergy <- as.factor("1")
 
+cases <- demo %>% filter(pheno_1_5_ratio == 1)
+controls <- demo %>% filter(pheno_1_5_ratio == 0)
 
 cases_allergy <- left_join(cases,allergy,by="eid")
 table(cases_allergy$allergy,exclude=NULL)
