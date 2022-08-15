@@ -12,7 +12,7 @@ args = commandArgs(TRUE)
 
 #inputfile:
 input_file = args[1] #input mungestat file
-pheno = args[2] #1_5_ratio_pheno #1_5_ratio_pheno_earlyonset #1_5_ratio_pheno_adultonset
+pheno = args[2]
 ldsc_intercept = as.numeric(args[3])
 #input_file <- "output/pheno_1_5_ratio_betase_input_mungestat"
 #input
