@@ -1,0 +1,4 @@
+./vep --appris --biotype --buffer_size 500 --distance 5000 --mane --merged \
+    --plugin Phenotypes,dir=[path_to]/,phenotype_feature=1,exclude_sources=COSMIC&HGMD-PUBLIC&Cancer_Gene_Census \z
+    --plugin GO,[path_to]/ --polyphen b --regulatory --sift b --species homo_sapiens --symbol --transcript_version \z
+    --tsl --uniprot --cache --input_file [input_data] --output_file [output_file]
