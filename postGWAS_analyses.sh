@@ -72,12 +72,12 @@ GWAS="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/allchr"
 ldsc_intercept='1.03'
 
 #run Manhattan, qqplot, lambda for all vars:
-PHENO="pheno_1_5_ratio"
-module unload R/4.2.1
-module load R/4.1.0
-chmod o+x src/REGENIE_plots.R
-dos2unix src/REGENIE_plots.R
-Rscript src/REGENIE_plots.R ${PATH_OUT}/${PHENO}_betase_input_mungestat ${PHENO} ${ldsc_intercept}
+#PHENO="pheno_1_5_ratio"
+#module unload R/4.2.1
+#module load R/4.1.0
+#chmod o+x src/REGENIE_plots.R
+#dos2unix src/REGENIE_plots.R
+#Rscript src/REGENIE_plots.R ${PATH_OUT}/${PHENO}_betase_input_mungestat ${PHENO} ${ldsc_intercept}
 
 #run Manhattan, qqplot, lambda for vars with maf >= 0.01:
 PHENO="maf001_pheno_1_5_ratio"
@@ -86,3 +86,22 @@ module load R/4.1.0
 chmod o+x src/REGENIE_plots.R
 dos2unix src/REGENIE_plots.R
 Rscript src/REGENIE_plots.R ${PATH_OUT}/${PHENO}_betase_input_mungestat ${PHENO} ${ldsc_intercept}
+
+#Sentinel selection:
+#PHENO="pheno_1_5_ratio"
+#module unload R/4.2.1
+#module load R/4.1.0
+#chmod o+x src/sentinel_selection.R
+#dos2unix src/sentinel_selection.R
+#Rscript src/sentinel_selection.R ${PATH_OUT}/${PHENO}_betase_input_mungestat ${PHENO}
+
+PHENO="maf001_pheno_1_5_ratio"
+#module unload R/4.2.1
+#module load R/4.1.0
+#chmod o+x src/sentinel_selection.R
+#dos2unix src/sentinel_selection.R
+#Rscript src/sentinel_selection.R ${PATH_OUT}/${PHENO}_betase_input_mungestat ${PHENO}
+
+#extract only genome-wide significant variants:
+awk -F "\t" '$9 <= 0.00000005 {print $0}' ${PATH_OUT}/${PHENO}_betase_input_mungestat \
+    > ${PATH_OUT}/${PHENO}_genomewide_signif

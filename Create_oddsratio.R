@@ -24,13 +24,15 @@ sumstat <- sumstat %>% mutate(direction_of_effect=ifelse(sumstat$LOG_ODDS > 0, "
 
 write.table(sumstat,output_file,sep="\t",quote=F,row.names=F)
 
-#For all sumstat:
+
+#For genome-wide sumstat:
 #inputfile:
-input_file = "output/maf001_pheno_1_5_ratio_betase_input_mungestat"
-output_file = "output/maf001_pheno_1_5_ratio_betase_input_mungestat_OR.txt"
+input_file = "output/maf001_pheno_1_5_ratio_genomewide_signif"
+output_file = "output/maf001_pheno_1_5_ratio_genomewide_signif_OR.txt"
 
 #input:
 sumstat <- fread(input_file,header=T)
+colnames(sumstat) <- c("snpid", "b37chr", "bp", "a1", "a2", "LOG_ODDS", "se", "eaf", "pval", "MAF")
 
 #create odds_ratio ci_lower ci_upper
 sumstat$odds_ratio <- exp(sumstat$LOG_ODDS)
@@ -44,3 +46,7 @@ sumstat$'OR_95_CI' <- paste0(format(round(sumstat$odds_ratio,2),nsmall=2)," [",f
 sumstat <- sumstat %>% mutate(direction_of_effect=ifelse(sumstat$LOG_ODDS > 0, "+","-"))
 
 write.table(sumstat,output_file,sep="\t",quote=F,row.names=F)
+
+
+#Mean OR and 95%CI for all maf001 variants:
+exp(mean(sumstat$LOG_ODDS))

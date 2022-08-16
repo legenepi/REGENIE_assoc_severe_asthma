@@ -14,7 +14,6 @@ args = commandArgs(TRUE)
 input_file = args[1] #input mungestat file
 pheno = args[2]
 ldsc_intercept = as.numeric(args[3])
-#input_file <- "output/pheno_1_5_ratio_betase_input_mungestat"
 #input
 meta <- fread(input_file, header=T, fill=T)
 
