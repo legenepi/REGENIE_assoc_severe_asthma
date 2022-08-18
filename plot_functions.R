@@ -5,7 +5,6 @@ plot.qqplot <- function(pval_vec,title){
 	       png(filename, width = 480, height = 480, units = "px", pointsize = 12, bg = "white")
                print(qq(pval_vec, main = plot_title, xlim = c(0,17), ylim = c(0,17), cex.axis = 1, cex = 1, las = 1)) #function from qqman library
                dev.off()
-
 }
 
 # Create a Manhattan plot from a data frame containing the results of
@@ -14,9 +13,9 @@ plot.Manha <- function (dataset,test_type,title) {
 	      colnames(dataset) <- c("SNP","CHR","BP","P") #the Manhattan function needs this format
               filename <- paste0("output/Manhattan_plot_",title,".png")
               plot_title = paste0("Manhattan plot ",title)
-	      png(filename, width = 2100, height = 550, units = "px", pointsize = 12, bg = "white")
+	      png(filename, width = 2700, height = 550, units = "px", pointsize = 12, bg = "white")
 	      manhattan(dataset, main = title, col = c("lightblue","blue3"), chrlabs = as.character(c(1:22)), ylim = c(0,20),
-	      cex = 1.2, cex.axis = 1.2, suggestiveline = F, genomewideline = F, cex.lab = 1.2)
+	      cex = 1.5, cex.axis = 1.5, suggestiveline = F, genomewideline = F, cex.lab = 1.5)
 	      #function from qqman library
 	      abline(h=-log10(0.00000005),lty="dashed",col="black")
 	      abline(h=-log10(0.000005),lty="solid",col="black")

@@ -1,4 +1,4 @@
-#!/usr/bin/env Rscript
+#!/usr/bin/env Rscriptcd all
 
 library(data.table)
 library(tidyverse)
@@ -7,13 +7,13 @@ args = commandArgs(trailingOnly=TRUE)
 df_file <- args[1]
 pheno <- as.character(args[2])
 
-df <- fread(df_file,fill=T,header=F)
+df <- fread(df_file,header=F)
 
-#CHROM GENPOS ID ALLELE0 ALLELE1 A1FREQ A1FREQ_CASES A1FREQ_CONTROLS INFO N TEST BETA SE CHISQ LOG10P
+#CHROM GENPOS ID ALLELE0 ALLELE1 A1FREQ INFO N TEST BETA SE CHISQ LOG10P
 #REGENIE: reference allele (allele 0), alternative allele (allele 1)
 #REGENIE:  estimated effect sizes (for allele 1 on the original scale)
 
-colnames(df) <- c("CHROM","GENPOS","ID","ALLELE0","ALLELE1","A1FREQ","A1FREQ_CASES.A1FREQ_CONTROLS","INFO","N","TEST","BETA","SE","CHISQ","LOG10P")
+colnames(df) <- c("CHROM", "GENPOS", "ID", "ALLELE0", "ALLELE1", "A1FREQ", "INFO", "N","TEST", "BETA", "SE", "CHISQ", "LOG10P")
 dfclean <- df %>% select(CHROM,ID,GENPOS,ALLELE1,ALLELE0,A1FREQ,LOG10P,BETA,SE)
 
 dfclean$pval <- 10^(-dfclean$LOG10P)
@@ -25,7 +25,7 @@ dfclean <- dfclean %>% select(ID,CHROM,GENPOS,ALLELE1,ALLELE0,BETA,SE,A1FREQ,pva
 colnames(dfclean) <- c("snpid", "b37chr", "bp", "a1", "a2", "LOG_ODDS", "se", "eaf", "pval")
 #save gwas all chr results:
 
-write.table(dfclean,paste0("output/",pheno,"_betase_input_mungestat"),quote=FALSE,sep="\t",row.names=FALSE)
+#write.table(dfclean,paste0("output/",pheno,"_betase_input_mungestat"),quote=FALSE,sep="\t",row.names=FALSE)
 
 
 #make sure eaf column is numeric:

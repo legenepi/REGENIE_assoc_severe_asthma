@@ -21,7 +21,7 @@ title_plot <- paste0("GWAS_",pheno)
 
 
 #QQ plot with qqman package: one genome-wide for each test-statistic p-val:
-plot.qqplot(pval_vec = meta$pval, title= title_plot)
+#plot.qqplot(pval_vec = meta$pval, title= title_plot)
 
 
 #Manhattan plot:

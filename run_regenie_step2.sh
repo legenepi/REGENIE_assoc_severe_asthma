@@ -35,7 +35,6 @@ regenie \
   --threads 4 \
   --minMAC 10 \
   --minINFO 0.3 \
-  --af-cc \
   --firth --approx --pThresh 0.01 \
   --pred ${OUT_DIR}/${pheno}.regenie.step1_pred.list \
   --bsize 1000 \
