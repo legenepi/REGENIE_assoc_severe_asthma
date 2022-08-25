@@ -51,6 +51,34 @@ cd ${PATH_OUT}/Locuszoom_builtin/
     --plotonly \
     signifLine=7.3 \
     --prefix EUR \
+    --ld \
     --build hg19 --pop EUR --source 1000G_Nov2014 --delim tab --pvalcol pval --markercol snpid \
     --plotonly --verbose
 
+
+#TO BE FINISHED:
+geno_dir="/data/ukb/genotyped"
+sample_DIR="/data/gen1/UKBiobank_500K/severe_asthma/data"
+PATH_DATA="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/data"
+module load plink
+plink --bfile ${geno_dir}/ukb_cal_chr8_v2 \
+    	--fam ${PATH_DATA}/ukb56607_cal_chr1_v2_s488239.fam \
+    	--r2
+
+
+
+#for chromosome 8 and 10:
+#for the built-in software:
+module unload R/4.2.1
+module load R/4.1.0
+module load plink
+cd ${PATH_OUT}/Locuszoom_builtin/
+/scratch/gen1/nnp5/locuszoom/locuszoom/bin/locuszoom \
+    --metal ${PATH_OUT}/header_chr${i}_input_mungestat \
+    --refsnp "rs12470864" --flank 1Mb \
+    --plotonly \
+    signifLine=7.3 \
+    --prefix EUR \
+    --ld ${PATH_OUT}\
+    --build hg19 --pop EUR --source 1000G_Nov2014 --delim tab --pvalcol pval --markercol snpid \
+    --plotonly --verbose
