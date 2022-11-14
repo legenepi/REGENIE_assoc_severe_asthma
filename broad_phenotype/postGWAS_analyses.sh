@@ -1,52 +1,71 @@
 #!/bin/bash
 
-#PBS -N post_gwas_asthma_broadpheno
+#PBS -N post_gwas_asthma_broadpheno_female
 #PBS -j oe
-#PBS -o post_gwas_asthma_broadpheno
-#PBS -l walltime=4:0:0
+#PBS -o post_gwas_asthma_broadpheno_female
+#PBS -l walltime=3:0:0
 #PBS -l vmem=50gb
 #PBS -l nodes=1:ppn=1
 #PBS -d .
 #PBS -W umask=022
 
 PATH_OUT="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output"
-PHENO="broad_pheno_1_5_ratio"
+PHENO="broad_pheno_male"
+
+#PHENO to change into:
+#"broad_pheno_1_5_ratio"
+#"broad_pheno_female"
+#"broad_pheno_male"
+#"broad_pheno_adultonset"
+#"broad_pheno_childonset"
 
 #mkdir ${PATH_OUT}/allchr
 GWAS="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/allchr"
 
 #merge all assoc file:
-#zcat ${PATH_OUT}/${PHENO}.1.regenie.step2_${PHENO}.regenie.gz | tail -n +2 | \
-#     awk -F " " '{print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13}' \
-#    > ${GWAS}/${PHENO}_allchr.assoc.txt
+zcat ${PATH_OUT}/${PHENO}.1.regenie.step2_${PHENO}.regenie.gz | tail -n +2 | \
+     awk -F " " '{print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13}' \
+    > ${GWAS}/${PHENO}_allchr.assoc.txt
 
-#for i in {2..22}
-#    do zcat ${PATH_OUT}/${PHENO}.${i}.regenie.step2_${PHENO}.regenie.gz | \
-#    tail -n +2 | awk -F " " '{print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13}' \
-#    >> ${GWAS}/${PHENO}_allchr.assoc.txt
-#done
+for i in {2..22}
+    do zcat ${PATH_OUT}/${PHENO}.${i}.regenie.step2_${PHENO}.regenie.gz | \
+    tail -n +2 | awk -F " " '{print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13}' \
+    >> ${GWAS}/${PHENO}_allchr.assoc.txt
+done
 
 
-#gzip ${GWAS}/${PHENO}_allchr.assoc.txt
+gzip ${GWAS}/${PHENO}_allchr.assoc.txt
 
 #create input ldsc file both for all vars and maf >= 0.01.
-#module unload R/4.2.1
-#module load R/4.1.0
-#chmod o+x src/create_input_munge_summary_stats.R
-#dos2unix src/create_input_munge_summary_stats.R
-#Rscript src/create_input_munge_summary_stats.R \
-#    ${GWAS}/${PHENO}_allchr.assoc.txt.gz \
-#    ${PHENO}
+module unload R/4.2.1
+module load R/4.1.0
+chmod o+x src/create_input_munge_summary_stats.R
+dos2unix src/create_input_munge_summary_stats.R
+Rscript src/create_input_munge_summary_stats.R \
+    ${GWAS}/${PHENO}_allchr.assoc.txt.gz \
+    ${PHENO}
 
 #LDSC interactively.
 #The results are the same for set with all vars and fitlered maf 0.01., because LDSC uses only vars > 0.01. So run
 #on the filtered set
 #cd /home/n/nnp5/software/ldsc
-
 #conda activate ldsc
 
-#tot_n=46086
-#PHENO="maf001_broad_pheno_1_5_ratio"
+#tot_n=42919
+
+#tot_n for broad pheno: 46086
+#tot_n for broad pheno female: 29646
+#tot_n for broad pheno male: 26440
+#tot_n for broad pheno adultonset: 42919
+#tot_n for broad pheno childhoodonset: 39944
+
+#PHENO="maf001_broad_pheno_adultonset"
+#"maf001_broad_pheno_1_5_ratio"
+#"maf001_broad_pheno_female"
+#"maf001_broad_pheno_male"
+#"maf001_broad_pheno_adultonset"
+#"maf001_broad_pheno_childhoodonset"
+
 
 #awk '{print $1, $2, $3, $4, $5, $6, $7, $8, $9}' ${PATH_OUT}/${PHENO}_betase_input_mungestat \
 #    > ${PATH_OUT}/${PHENO}_betase_input_mungestat_clean
@@ -69,19 +88,19 @@ GWAS="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/allchr"
 #cd /home/n/nnp5/PhD/PhD_project/REGENIE_assoc/
 
 #Plots:
-ldsc_intercept='1.02'
-
+#ldsc_intercept=1.00
+#broad pheno:'1.02'
+#broad pheno female:'1.02'
+#broad pheno adultonset:'1.00'
 
 #run Manhattan, qqplot, lambda for vars with maf >= 0.01:
-PHENO="maf001_broad_pheno_1_5_ratio"
-module unload R/4.2.1
-module load R/4.1.0
-chmod o+x src/REGENIE_plots.R
-dos2unix src/REGENIE_plots.R
-Rscript src/REGENIE_plots.R ${PATH_OUT}/${PHENO}_betase_input_mungestat ${PHENO} ${ldsc_intercept}
+#module unload R/4.2.1
+#module load R/4.1.0
+#chmod o+x src/REGENIE_plots.R
+#dos2unix src/REGENIE_plots.R
+#Rscript src/REGENIE_plots.R ${PATH_OUT}/${PHENO}_betase_input_mungestat ${PHENO} ${ldsc_intercept}
 
 #Sentinel selection:
-#PHENO="maf001_broad_pheno_1_5_ratio"
 #module unload R/4.2.1
 #module load R/4.1.0
 #chmod o+x src/sentinel_selection.R
@@ -92,11 +111,6 @@ Rscript src/REGENIE_plots.R ${PATH_OUT}/${PHENO}_betase_input_mungestat ${PHENO}
 #awk -F "\t" '$9 <= 0.00000005 {print $0}' ${PATH_OUT}/${PHENO}_betase_input_mungestat \
 #    > ${PATH_OUT}/${PHENO}_genomewide_signif
 
-
-#look at sentinel variants for BTS4-5 to see if they have similar effect size and same direction of effect:
-PHENO="maf001_broad_pheno_1_5_ratio"
-awk '{print $1}' ${PATH_OUT}/maf001_pheno_1_5_ratio_sentinel_variants.txt | \
-    grep -w -F -f - ${PATH_OUT}/${PHENO}_betase_input_mungestat > ${PATH_OUT}/${PHENO}_BTS45_sentinel_vars
-
 #create OddsRatio and direction of effect using Create_oddsratio.R
-Rscript src/broad_phenotype/Create_oddsratio.R ${PATH_OUT}/${PHENO}_BTS45_sentinel_vars ${PATH_OUT}/${PHENO}_BTS45_sentinel_vars_OR.txt
+#Rscript src/broad_phenotype/Create_oddsratio.R ${PATH_OUT}/${PHENO}_sentinel_variants.txt ${PATH_OUT}/${PHENO}_sentinel_variants_OR.txt
+
