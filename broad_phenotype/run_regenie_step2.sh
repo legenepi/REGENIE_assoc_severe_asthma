@@ -13,7 +13,8 @@ PATH_DATA="/data/gen1/UKBiobank_500K/severe_asthma/Noemi_PhD/data/"
 OUT_DIR="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output"
 sample_DIR="/data/gen1/UKBiobank_500K/severe_asthma/data"
 scratch_DIR="/scratch/gen1/nnp5/REGENIE_assoc/tmp_data"
-pheno="broad_pheno_1_5_ratio"
+pheno="broad_pheno_1_5_ratio" #broad_pheno_1_5_ratio or broad_pheno_1_5_ratio
+test_type="recessive" #additive, this variable is NULL (default) or dominant
 
 #run as: qsub -t 1-22 src/broad_phenotype/run_regenie_step2.sh
 
@@ -38,5 +39,6 @@ regenie \
   --firth --approx --pThresh 0.01 \
   --pred ${OUT_DIR}/${pheno}.regenie.step1_pred.list \
   --bsize 1000 \
-  --out ${OUT_DIR}/${pheno}.${chr}.regenie.step2
+  --test ${test_type} \
+  --out ${OUT_DIR}/${pheno}.${chr}.${test_type}regenie.step2
 

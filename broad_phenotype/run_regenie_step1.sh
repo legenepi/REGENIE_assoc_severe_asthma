@@ -11,8 +11,8 @@
 PATH_DATA="/data/gen1/UKBiobank_500K/severe_asthma/Noemi_PhD/data/"
 OUT_DIR="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output"
 scratch_dir="/scratch/gen1/nnp5/REGENIE_assoc/tmp_data"
-pheno="broad_pheno_1_5_ratio"
-
+pheno="broad_pheno_1_5_ratio" #broad_pheno_1_5_ratio or broad_pheno_1_5_ratio
+test_type="recessive" #additive, this variable is NULL (default) or dominant
 
 module load regenie
 regenie \
@@ -29,4 +29,5 @@ regenie \
   --loocv \
   --threads 4 \
   --gz \
-  --out ${OUT_DIR}/${pheno}.regenie.step1
+  --test ${test_type} \
+  --out ${OUT_DIR}/${pheno}.${test_type}regenie.step1
