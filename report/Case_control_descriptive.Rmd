@@ -1,0 +1,99 @@
+---
+title: "Case-control dataset and descriptive analysis"
+author: "Noemi Nicole Piga"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    code_folding: "hide"
+    toc: true
+    toc_float: true
+    theme: united
+---
+
+
+```{r, setup, hide = TRUE}
+#library reticulate to be able to add chuncks in another language
+library(reticulate)
+# To run this .rmd file in a terminal being in the project folder:
+#export PATH=${PATH}:/cm/shared/apps/R/deps/rstudio/bin/pandoc
+#file="./report/Case_control_descriptive.Rmd"
+#module unload R/4.2.1
+#module load R/4.1.0
+#Rscript -e 'rmarkdown::render("'$file'")'
+```
+# Rationale
+Create the case and control dataset to run the genome-wdie association analysis. Descriptive analysis of several demographical and biological features.
+
+# Analysis
+Code: SA_UKBiobank_datafields_create_MasterTable.sh
+```{bash, code = readLines('/home/n/nnp5/PhD/PhD_project/UKBiobank_datafields/scripts/SA_UKBiobank_datafields_create_MasterTable.sh'), eval=FALSE}
+```
+Code: SA_UKBiobank_datafields_create_MasterTable.py
+```{bash, code = readLines('/home/n/nnp5/PhD/PhD_project/UKBiobank_datafields/scripts/SA_UKBiobank_datafields_create_MasterTable.py'), eval=FALSE}
+```
+Code: Add_genAnc_PCs_demo.r
+```{bash, code = readLines('/home/n/nnp5/PhD/PhD_project/UKBiobank_datafields/scripts/Add_genAnc_PCs_demo.r'), eval=FALSE}
+```
+Code: merge_age_onset.r
+```{bash, code = readLines('/home/n/nnp5/PhD/PhD_project/UKBiobank_datafields/scripts/merge_age_onset.r'), eval=FALSE}
+```
+Code: control_definition.sh
+```{bash, code = readLines('/home/n/nnp5/PhD/PhD_project/UKBiobank_datafields/scripts/control_definition.sh'), eval=FALSE}
+```
+Code: control_definition_V2.sh
+```{bash, code = readLines('/home/n/nnp5/PhD/PhD_project/UKBiobank_datafields/scripts/control_definition_V2.sh'), eval=FALSE}
+```
+Code: pheno_cov_file.r
+```{bash, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/pheno_cov_file.r'), eval=FALSE}
+```
+Code: case_control_descriptive.R
+```{bash, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/case_control_descriptive.R'), eval=FALSE}
+```
+Cases were defined as having either:
+
+
+ *all-comer asthma with medications within British Thoracic Society 2019 guidelines step 4-5 filter (see 'Phenotype Definition');
+
+
+ *hospitalisation due to asthma as primary reason (Data-Field 41234, value ‘L1’);
+ 
+ 
+ *death due to asthma as primary reason (Data-Fields 40001, ICD-10 code value ‘J45’ or ‘J46’);
+ 
+ 
+ *European ancestry
+ 
+<br>
+Controls were defined as individuals without the following (Figure 6):
+
+
+ *Either asthma, emphysema, chronic bronchitis or COPD diagnostic codes (Table S8);
+
+
+ *Self-reported asthma or any other major respiratory condition (Data-field 20002, value ‘1111’ for asthma and ‘1072/1466/1130/1131/1132/1133/1134/1135/1660/1139/1140/1141/1142/1143/1144/1467/1164/1168/1534/1559/1560/1561/1562/1563/1465’ for other respiratory conditions);
+ 
+ 
+ *FEV1/FVC ratio <= 70% (Data-Field 20150, 20151);
+ 
+ 
+ *Predicted percentage FEV1 < 60% (Data-Field 20154);
+ 
+ 
+ *General practice prescriptions or self-reported medications for asthma (Data-Field 42039, 20003);
+ 
+ 
+ *Absence of GP prescription or self-reported medication records (Data-Field 42039, 20003);
+
+
+ *Non-European ancestry
+
+I selected five age- and sex-matched controls for every case.
+<br>
+In order to investigate my case-control cohort, I compared demographic information including genetic sex (Data-Field 22001), age at recruitment (Data-Field 21022), and smoking status (Data-Field 20116) as defined in U-BIOPRED63 using pack years of smoking (Data-Field 20616). I also compared clinical traits: age at onset of asthma (merged Data-Field 3786 and 22147), BMI (Data-Field 23104), hospitalisation due to asthma (Data-Field 41234, ICD-9 and ICD-10, ‘level 1’), eosinophil count (Data-Field 30150), neutrophil count (Data-Field 30140), percentage predicted FEV1 (in house pre-processed from Data-Field 20154), FEV1/FVC ratio (in-house pre-processed from Data-Field 20150, 20151), prednisolone use (from prescription records, Data-field 42039).
+
+# Results
+I obtained 4,021 individuals with hospitalisation and 45 individuals with death primarily due to asthma. I merged this result with the European individuals within British Thoracic Society (BTS) stage 4-5 obtaining a final number of 7,681 cases. I selected five age- and sex-matched controls for every case, obtaining 38,405 European controls.
+<br>
+Overall, the mean age is 57 years old. The dataset has a higher proportion of females compared to males (63.95% vs 36.05%). Cases exhibit higher BMI, lower lung function, and higher blood cell counts of eosinophils and neutrophils compared to controls. There are a similar proportion of smokers and non-smokers between cases and controls. Amongst cases, 61.82% self-report adult-onset asthma, 8.37% have been hospitalised with asthma as primary cause at least once, and 66.70% have been prescribed for prednisolone at least onc (see 'Probation' Table1).
+
+# Conclusion

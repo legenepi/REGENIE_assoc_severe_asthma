@@ -1,0 +1,30 @@
+---
+title: "Sentinel selection and conditional analysis"
+author: "Nomei Nicole Piga"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    code_folding: "hide"
+    toc: true
+    toc_float: true
+    theme: united
+---
+
+
+```{r, setup, hide = TRUE}
+#library reticulate to be able to add chuncks in another language
+library(reticulate)
+# To run this .rmd file in a terminal being in the project folder:
+#export PATH=${PATH}:/cm/shared/apps/R/deps/rstudio/bin/pandoc
+#file="./report/Sentinel_and_conditional_analysis.Rmd"
+#module unload R/4.2.1
+#module load R/4.1.0
+#Rscript -e 'rmarkdown::render("'$file'")'
+```
+# Rationale
+
+# Analysis
+
+# Results
+
+# Conclusion
