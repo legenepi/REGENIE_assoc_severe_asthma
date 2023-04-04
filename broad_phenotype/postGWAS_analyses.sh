@@ -9,6 +9,8 @@
 #PBS -d .
 #PBS -W umask=022
 
+
+#Set variables:
 PATH_OUT="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output"
 PHENO="broad_pheno_1_5_ratio"
 
@@ -19,7 +21,16 @@ PHENO="broad_pheno_1_5_ratio"
 #"broad_pheno_adultonset"
 #"broad_pheno_childhoodonset"
 #"broad_pheno_1_5_ratio"
-test_type="dominant" #additive, NULL; use ONLY  this variable only with dominant or recessive test
+test_type="recessive" #additive: NULL. use ONLY  this variable only with dominant or recessive test
+test_type_underscore="recessive_" #additive: NULL. use ONLY  this variable only with dominant or recessive test
+
+#N of individuals, to change:
+tot_n=46086
+#tot_n for broad pheno (additive recessive and dominant): 46086
+#tot_n for broad pheno female: 29646
+#tot_n for broad pheno male: 16440
+#tot_n for broad pheno adultonset: 42919
+#tot_n for broad pheno childhoodonset: 39944
 
 #mkdir ${PATH_OUT}/allchr
 GWAS="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/allchr"
@@ -36,7 +47,6 @@ GWAS="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/allchr"
 #    >> ${GWAS}/${PHENO}_${test_type}allchr.assoc.txt
 #done
 
-
 #gzip ${GWAS}/${PHENO}_${test_type}allchr.assoc.txt
 
 #create input ldsc file both for all vars and maf >= 0.01.
@@ -51,24 +61,15 @@ GWAS="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/allchr"
 #LDSC interactively.
 #The results are the same for set with all vars and fitlered maf 0.01., because LDSC uses only vars > 0.01. So run
 #on the filtered set
-#cd /home/n/nnp5/software/ldsc
-#conda activate ldsc
-
-tot_n=46086
-
-#tot_n for broad pheno (additive recessive and dominant): 46086
-#tot_n for broad pheno female: 29646
-#tot_n for broad pheno male: 16440
-#tot_n for broad pheno adultonset: 42919
-#tot_n for broad pheno childhoodonset: 39944
+cd /home/n/nnp5/software/ldsc
+conda activate ldsc
 
 PHENO="maf001_broad_pheno_1_5_ratio"
-#"maf001_broad_pheno_1_5_ratio"
+#"maf001_broad_pheno_1_5_ratio" for additive, recessive, dominant models
 #"maf001_broad_pheno_female"
 #"maf001_broad_pheno_male"
 #"maf001_broad_pheno_adultonset"
 #"maf001_broad_pheno_childhoodonset"
-test_type_underscore="dominant_"
 
 #awk '{print $1, $2, $3, $4, $5, $6, $7, $8, $9}' ${PATH_OUT}/${PHENO}_${test_type_underscore}betase_input_mungestat \
 #    > ${PATH_OUT}/${PHENO}_${test_type_underscore}betase_input_mungestat_clean
@@ -91,14 +92,14 @@ test_type_underscore="dominant_"
 #cd /home/n/nnp5/PhD/PhD_project/REGENIE_assoc/
 
 #Plots:
-ldsc_intercept=1.01
+ldsc_intercept=1.00
 #broad pheno:'1.02'
 #broad pheno female:'1.02'
 #broad pheno adultonset:'1.00'
 #broad pheno male:'1.04'
 #broad pheno childhoodonset:'1.02'
 #broad pheno dominant:'1.01'
-#broad pheno recessive:' '
+#broad pheno recessive:'1.00'
 
 #run Manhattan, qqplot, lambda for vars with maf >= 0.01:
 module unload R/4.2.1
