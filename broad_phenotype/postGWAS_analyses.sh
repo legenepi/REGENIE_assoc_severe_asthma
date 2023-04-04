@@ -61,8 +61,8 @@ GWAS="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/allchr"
 #LDSC interactively.
 #The results are the same for set with all vars and fitlered maf 0.01., because LDSC uses only vars > 0.01. So run
 #on the filtered set
-cd /home/n/nnp5/software/ldsc
-conda activate ldsc
+#cd /home/n/nnp5/software/ldsc
+#conda activate ldsc
 
 PHENO="maf001_broad_pheno_1_5_ratio"
 #"maf001_broad_pheno_1_5_ratio" for additive, recessive, dominant models
