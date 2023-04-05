@@ -33,7 +33,7 @@ Run recessive and dominant genetic test models for GWAS of severe asthma individ
 Historically, additive model is the most used for GWAS due to its value to pick more variants with small effects. However, in the last years, researchers have 
 started to use the other genetic tests and to compare the results. 
 <br>
-We decide to do the same with our 46,086 individuals of European ancestry with severe asthma in UK Biobank
+We decide to do the same with our 46,086 individuals of European ancestry with severe asthma in UK Biobank.
 
 # Analysis
 Run REGENIE association analysis with the three different model: same parameters, except for '--test', which was changed everytime according to the test type.
@@ -50,7 +50,11 @@ Number of analysed variants changed for the different tests:
 I then retained results for variants with minor allele frequency (MAF) equal or greater than 0.01. These variants were used to calculate linkage 
 disequilibrium score regression (LDSC) intercept, as measure of genomic inflation; obtain Q-Q plot and Manhattan plot; find sentinel variants and calculate odds ratio. 
 <br>
-For more information about the REGENIE association analysis, post-analysis quality control and visualisation for the additive test, visit 'GWAS > Association Analysis'.
+The code used is the same presented in 'GWAS > Association Analysis'. Additionally here, I used a script to create Miami plot.
+<br>
+Code: src/broad_phenotype/Miami_plot.R
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/broad_phenotype/Miami_plot.R'), eval=FALSE}
+```
 
 # Results
 The number of analysed variants with MAF > 0.01 is:
@@ -60,12 +64,12 @@ The number of analysed variants with MAF > 0.01 is:
  - dominant: 9,804,755
 
 ## Recessive
-I obtained an ldsc intercept of 1.01 and Q-Q plot is shown below (Fig. 1):
+I obtained ldsc intercept of 1.01 and Q-Q plot as shown below (Fig. 1):
 ```{r, out.width='50%', fig.align='center', fig.cap='Fig1. Q-Q plot recessive genetic test', echo = FALSE}
 knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/Q-Q_plot_GWAS_maf001_broad_pheno_1_5_ratio_recessive.png')
 ```
 
-Sentinel selection found 12 sentinel variants and loci (Table 1), visible in the Manhattan plot (Fig. 2):
+Twelve sentinel variants and loci were identified (Table 1), visible in the Manhattan plot (Fig. 2):
 ```{r, echo=FALSE, eval=TRUE}
 library(readxl)
 recessive_sentinel <- as.data.frame(read_excel("/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/report/Sentinel_variants_different_pheno.xlsx", sheet = "Broad_pheno_recessive"))
@@ -85,12 +89,12 @@ knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/Miami
 
 
 ## Dominant
-I obtained an ldsc intercept of 1.01 and Q-Q plot is shown below (Fig. 4):
+I obtained ldsc intercept of 1.01 and Q-Q plot as shown below (Fig. 4):
 ```{r, out.width='50%', fig.align='center', fig.cap='Fig4. Q-Q plot dominant genetic test', echo = FALSE}
 knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/Q-Q_plot_GWAS_maf001_broad_pheno_1_5_ratio_dominant.png')
 ```
 
-Sentinel selection found 15 sentinel variants and loci (Table 2), visible in the Manhattan plot (Fig. 5):
+Fifteen sentinel variants and loci were identified (Table 2), visible in the Manhattan plot (Fig. 5):
 ```{r, echo=FALSE, eval=TRUE}
 library(readxl)
 dominant_sentinel <- as.data.frame(read_excel("/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/report/Sentinel_variants_different_pheno.xlsx", sheet = "Broad_pheno_dominant"))
@@ -108,15 +112,18 @@ Miami plot between additive and dominant genetic test (Fig. 6):
 knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/Miami_plot_Eur_UKBB_broad_pheno_VS_broad_pheno_dominant.png')
 ```
 
+## Comparison of sentinel variants and loci between the three tests
+Table 3 reports all the sentinel variants found by either test and comparing the statistics from all three:
+(Table 3 still in progress)
+
+
 # Conclusion
-The number of variants analysed by REGENIE changed according to the type of genetic test: the recessive model is the one with the lowest number of variants, while the additive and the dominant are pretty comparable. However, the number of variants after MAF filtering is pretty much the same; this step in independent by the software and it happened after the REGENIE analysis.
+The number of variants analysed by REGENIE changed according to the type of genetic test: the recessive model is the one with the lowest number of variants, while the additive and the dominant are pretty comparable. Anyway, the number of variants after MAF filtering is pretty much the same; this step is independent by the software and it happened after the REGENIE analysis.
 <br>
 All the three tests shared the majority of significant loci, in some cases with the same sentinel variants, in others with a different one. The dominant model revealed a genome-wide significant locus on chromosome 4, which is just below the genome-wide significant in the additive one (Fig. 6).
 <br>
-Neither the recessive nor the dominant showed evidence of genome-wide significance for the locus on chromosome 3 (rs778801698: dominant p-value 1.20 x 10-6, 
-recessive p-value 6.69 x 10-6).
+Neither the recessive nor the dominant showed evidence of genome-wide significance for the locus on chromosome 3, although it is below suggestive threshold of 5 x 10-6 for the dominant test (rs778801698: dominant p-value 1.20 x 10-6, recessive p-value 6.69 x 10-6).
 <br>
-Regarding direction of effect:
-TO BE FINISH
+Regarding direction of effect: the recessive test showed concordance of effect for all sentinel, while the dominant test showed four sentinels with opposite direction, though, they are different sentinels from the ones found in the additive analysis.
 
 # Notes
