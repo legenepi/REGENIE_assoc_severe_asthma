@@ -51,5 +51,6 @@ GWAS="/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/allchr"
 #df3 <- inner_join(df,df2)
 #Some variants are lot due to slightly different rounding. I conclude that the result are pretty much the same.
 
-
+#remove check .gz:
+rm ${GWAS}/check_${PHENO}_allchr.assoc.txt.gz
 
