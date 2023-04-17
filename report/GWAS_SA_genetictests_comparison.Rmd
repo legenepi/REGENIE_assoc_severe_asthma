@@ -55,6 +55,11 @@ The code used is the same presented in 'GWAS > Association Analysis'. Additional
 Code: src/broad_phenotype/Miami_plot.R
 ```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/broad_phenotype/Miami_plot.R'), eval=FALSE}
 ```
+I compared the effect size of the sentinel variants of the additive model with the other two models. In addition, I looked at variants with MAF < 0.01 to see if their effect size and/or p-value changed with regards to different methods.
+<br>
+Code : src/broad_phenotype/comparison_genetic_test.R
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/broad_phenotype/comparison_genetic_test.R'), eval=FALSE}
+```
 
 # Results
 The number of analysed variants with MAF > 0.01 is:
@@ -78,12 +83,12 @@ recessive_sentinel <- recessive_sentinel[1:12,]
 knitr::kable(recessive_sentinel,caption = "Table 1. Sentinel variants recessive test")
 ```
 
-```{r, out.width='100%', out.height='200%', fig.align='center', fig.cap='Fig2. Manhattan plot recessive genetic test', echo = FALSE}
+```{r, out.width='120%', out.height='200%', fig.align='center', fig.cap='Fig2. Manhattan plot recessive genetic test', echo = FALSE}
 knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/Manhattan_plot_GWAS_maf001_broad_pheno_1_5_ratio_recessive.png')
 ```
 
 Miami plot between additive and dominant genetic test (Fig 3):
-```{r, out.width='50%', fig.align='center', fig.cap='Fig3. Manhattan plot recessive genetic test', echo = FALSE}
+```{r, out.width='100%', fig.align='center', fig.cap='Fig3. Manhattan plot recessive genetic test', echo = FALSE}
 knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/Miami_plot_Eur_UKBB_broad_pheno_VS_broad_pheno_recessive.png')
 ```
 
@@ -103,19 +108,37 @@ dominant_sentinel <- dominant_sentinel[1:15,]
 knitr::kable(dominant_sentinel,caption = "Table 2. Sentinel variants dominant test")
 ```
 
-```{r, out.width='100%', out.height='200%', fig.align='center', fig.cap='Fig5. Manhattan plot dominant genetic test', echo = FALSE}
+```{r, out.width='120%', out.height='200%', fig.align='center', fig.cap='Fig5. Manhattan plot dominant genetic test', echo = FALSE}
 knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/Manhattan_plot_GWAS_maf001_broad_pheno_1_5_ratio_dominant.png')
 ```
 
 Miami plot between additive and dominant genetic test (Fig. 6):
-```{r, out.width='50%', fig.align='center', fig.cap='Fig6. Manhattan plot dominant genetic test', echo = FALSE}
+```{r, out.width='100%', fig.align='center', fig.cap='Fig6. Manhattan plot dominant genetic test', echo = FALSE}
 knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/Miami_plot_Eur_UKBB_broad_pheno_VS_broad_pheno_dominant.png')
 ```
 
-## Comparison of sentinel variants and loci between the three tests
-Table 3 reports all the sentinel variants found by either test and comparing the statistics from all three:
-(Table 3 still in progress)
+## Comparison between the three tests
 
+### Sentinel variants
+The different genetic tests show concordance of direction of effect for the sentinel variants found by the additive test (Fig.7). Some variants are not significant in the recessive or dominant tests.
+```{r, out.width='100%', fig.align='center', fig.cap='Fig7. Box plot effect size sentinel variants among different genetic tests', echo = FALSE}
+knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/OR_sentinel_genetic_test_boxplot.png')
+```
+<br>
+```{r, out.width='100%', fig.align='center', fig.cap='Fig8. P-value of sentinel variants among different genetic tests', echo = FALSE}
+knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/pval_sentinel_genetic_test_plot.png')
+```
+
+### Variants with MAF < 0.01
+Recessive test have a reduced number of variants with MAF < 0.01 (Fig.9), whereas the dominant model has a comparable number with the additive test:
+```{r, out.width='100%', fig.align='center', fig.cap='Fig8. Histogram plot of variants with MAF < 0.01 among different genetic tests', echo = FALSE}
+knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/MAF_genetic_test_boxplot.png')
+```
+<br>
+These variants do not show significant p-value in any test (Fig.10):
+```{r, out.width='100%', fig.align='center', fig.cap='Fig9. Histogram plot of p-value (-log10(p-value)) for variants with MAF < 0.01 among different genetic tests', echo = FALSE}
+knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/pval_genetic_test_boxplot.png')
+```
 
 # Conclusion
 The number of variants analysed by REGENIE changed according to the type of genetic test: the recessive model is the one with the lowest number of variants, while the additive and the dominant are pretty comparable. Anyway, the number of variants after MAF filtering is pretty much the same; this step is independent by the software and it happened after the REGENIE analysis.
@@ -124,6 +147,8 @@ All the three tests shared the majority of significant loci, in some cases with 
 <br>
 Neither the recessive nor the dominant showed evidence of genome-wide significance for the locus on chromosome 3, although it is below suggestive threshold of 5 x 10-6 for the dominant test (rs778801698: dominant p-value 1.20 x 10-6, recessive p-value 6.69 x 10-6).
 <br>
-Regarding direction of effect: the recessive test showed concordance of effect for all sentinel, while the dominant test showed four sentinels with opposite direction, though, they are different sentinels from the ones found in the additive analysis.
+Regarding direction of effect: the recessive test showed concordance of effect for all sentinel, while the dominant test showed four sentinels with opposite direction, though, they are different sentinels from the ones found in the additive analysis. When looking at the sentinel variants for the additive test, both the recessive and the dominant tests show concordance of direction.
+<br>
+Variants with MAF < 0.01 did not add any significant new results to the analysis.
 
 # Notes
