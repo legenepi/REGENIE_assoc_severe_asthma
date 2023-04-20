@@ -12,9 +12,9 @@ output:
 
 
 ```{r, setup, hide = TRUE}
-#library reticulate to be able to add chuncks in another language
+#library reticulate to be able to add chunks in another language
 library(reticulate)
-# To run this .rmd file in a terminal being in the project folder:
+#To run this .rmd file in a terminal being in the project folder:
 #export PATH=${PATH}:/cm/shared/apps/R/deps/rstudio/bin/pandoc
 #file="./report/Association_analysis.Rmd"
 #module unload R/4.2.1
@@ -22,9 +22,80 @@ library(reticulate)
 #Rscript -e 'rmarkdown::render("'$file'")'
 ```
 # Rationale
+Genome-wide association analysis (GWAS) 7,681 severe asthma cases and 38,405 controls in European ancestry UK Biobabank participants. For details of the phenotype definition and case/control dataset, lease see 'Phenotype Definition' and 'GWAS --> Case/Control and descriptive analysis' sections.
 
 # Analysis
+## Code
+Code: src/plink_QC_eur.sh
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/plink_QC_eur.sh'), eval=FALSE}
+```
+Code: src/broad_phenotype/run_regenie_step1.sh
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/broad_phenotype/run_regenie_step1.sh'), eval=FALSE}
+```
+Code: src/broad_phenotype/run_regenie_step2.sh
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/broad_phenotype/run_regenie_step2.sh'), eval=FALSE}
+```
+Code: src/broad_phenotype/postGWAS_analyses.sh
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/broad_phenotype/postGWAS_analyses.sh'), eval=FALSE}
+```
+
+## Genotype and Imputation data
+UK Biobank individuals were genotyped using the UK Biobank Axiom Array including 825,927 variants53. Imputed data for ~93M autosomal variants53 were obtained using a combined reference panel inclusive of the Haplotype Reference Consortium panel7, the UK10K8 and 1000GP Phase 39.
+
+## REGENIE
+I performed a GWAS using the software REGENIE v2.2.4 and assuming an additive genetic test, with covariates: age at recruitment, age at recruitment squared, genetic sex, and the first 10 principal components.
+<br>
+REGENIE is a machine-learning approach based on a two-step analysis and has shown better performance in terms of time and memory with respect to other similar methods. In step 1, a set of genotyped and good quality SNPs is used to create a prediction model to be used as a covariate in step 2 which implements a linear or logistic regression for the association analysis. (More detail on the software in 'Report' section).
+<br>
+Since REGENIE step 1 requires good quality genotype data, the authors recommend a preliminary step of filtering and quality control using the software plink v2 [2]: excluding variants with minor allele frequency (MAF) < 1%, minor allele count (MAC) < 100, missingness above 10%, and Hardy-Weinberg equilibrium p-value > 10e-15. Individuals with > 10% missing genotypes are also excluded. The resulting variants and samples were kept as input for REGENIE step 1.
+<br>
+For REGENIE step 2, I used the option ‘--bt’ (to specify a binary outcome) and the Firth test was applied for p-values below 0.01. Variants with MAF of at least 1%, MAC of at least 10 and INFO imputation score of at least 0.3 were used for this analysis.
+
+## Power calculation
+I used the GAS Power Calculator, a free accessible online tool to compute statistical power for one-stage genetic association analysis [3]. The parameters used were (Fig 1): sample size (7,681 cases; 38405 control); significance level (5e-8); multiplicative disease model (equivalent to additive model for this software); prevalence of disease as the proportion of asthmatic individuals taking high intensity treatments as a proxy for our case definition, which is estimated to be 24% of the asthma population [4] (24% of 12% as prevalence of all asthma in UK population, thus 0.028); disease allele frequency as 0.203 based on Hakonarson et al. 2019 [5]; genotype relative risk of 1.2 as for Kuruvilla et al. 2019 [5].
+
+<br>
+```{r, out.width='100%', out.height='200%', fig.align='center', fig.cap='Fig 1. Input parameters of power calculation.', echo = FALSE}
+knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/GAS_power_calculation_broad_pheno_input.PNG')
+```
+
+## Visualisation and quality control
+Q-Q plot and Manhattan plots were obtained using the R package ‘qqman’71 and R v4.1.0. In order to identify any residual genomic factor that could have biased the analysis, I calculated the LDscore (LDSC) regression intercept using ldsc v1.0.1 72 and including the LD patterns of the European super-population of 1000 Genome Project [7].
 
 # Results
+I tested 9,804,778 variants for association with BTS 4-5 stage asthma, hospitalisation or death due to asthma, in 7,681 cases and 38,405 controls. Of these, 7,198 variants were associated with case status at a genome-wide significant threshold (p-value = 5e-08) (Fig 2). Power calculations for this analysis showed an overall statistical power above 99.9% (Fig 3) to detect associations with variants showing disease allele frequency of 20.3% and mean genetic effect size of 1.20; but power was below 80% for variants with MAF less than ~9.5% (Fig 4).
+<br>
+```{r, out.width='100%', out.height='200%', fig.align='center', fig.cap='Fig 2. Manhattan plot of asthma GWAS.', echo = FALSE}
+knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/Manhattan_plot_GWAS_maf001_broad_pheno_1_5_ratio.png')
+```
+<br>
+```{r, out.width='100%', out.height='200%', fig.align='center', fig.cap='Fig 3. Output of power calculation.', echo = FALSE}
+knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/GAS_power_calculation_broad_pheno.PNG')
+```
+<br>
+```{r, out.width='100%', out.height='200%', fig.align='center', fig.cap='Fig 4. Zoom in power/effect allele frequency (eaf).', echo = FALSE}
+knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/GAS_power_calculation_broad_pheno_less80.PNG')
+```
+<br>
+LDSC regression intercept for the GWAS was 1.02 suggesting little systematic bias due to population stratification (Fig 5). Since LDSC < 1.05, no genomic correction was applied.
+```{r, fig.align='center', fig.cap='Fig 5. Q-Q plot asthma GWAS.', echo = FALSE}
+knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/Q-Q_plot_GWAS_maf001_broad_pheno_1_5_ratio.png')
+```
 
 # Conclusion
+I ran a GWAS using the REGENIE software and I obtained genome-wide significant SNPs which will be further analysed for sentinel selection, conditional analysis and several post-GWAS analyses ('GWAS/Sentinel and Conditional analysis'; 'Post -GWAS'). 
+
+
+# References
+1. Mbatchou J., Barnard L., Backman J. et al. Computationally efficient whole-genome regression for quantitative and binary traits. Nat Genet 53, 1097–1103 (2021). https://doi.org/10.1038/s41588-021-00870-7
+<br>
+2. Chang C. et al, Second-generation PLINK: rising to the challenge of larger and richer datasets, GigaScience, Volume 4, Issue 1, December 2015, s13742–015–0047–8. https://doi.org/10.1186/s13742-015-0047-8
+<br>
+3. Johnson, J.L. & Abecasis, G.R. GAS Power Calculator: web-based power calculator for genetic association studies. bioRxiv, 164343 (2017).
+<br>
+4. Asthma, G.I.f. Global Strategy for Asthma Management and Prevention. (2022).
+<br>
+5. Hakonarson, H. et al. Allelic frequencies and patterns of single-nucleotide polymorphisms in candidate genes for asthma and atopy in Iceland.
+<br>
+6. Kuruvilla, M.E., Vanijcharoenkarn, K., Shih, J.A. & Lee, F.E. Epidemiology and risk factors for asthma.
+7. Auton, A. et al. A global reference for human genetic variation. Nature 526, 68-74 (2015).
