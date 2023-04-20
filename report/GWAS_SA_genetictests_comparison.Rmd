@@ -132,12 +132,12 @@ knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/pval_
 ### Variants with MAF < 0.01
 Recessive test have a reduced number of variants with MAF < 0.01 (Fig.9), whereas the dominant model has a comparable number with the additive test:
 ```{r, out.width='100%', fig.align='center', fig.cap='Fig8. Histogram plot of variants with MAF < 0.01 among different genetic tests', echo = FALSE}
-knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/MAF_genetic_test_boxplot.png')
+knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/MAF_genetic_test_histplot.png')
 ```
 <br>
 These variants do not show significant p-value in any test (Fig.10):
 ```{r, out.width='100%', fig.align='center', fig.cap='Fig9. Histogram plot of p-value (-log10(p-value)) for variants with MAF < 0.01 among different genetic tests', echo = FALSE}
-knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/pval_genetic_test_boxplot.png')
+knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/pval_genetic_test_histplot.png')
 ```
 
 # Conclusion
