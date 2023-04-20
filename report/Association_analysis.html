@@ -1893,6 +1893,46 @@ Rscript src/REGENIE_plots.R \
 
 #create OddsRatio and direction of effect using Create_oddsratio.R
 #Rscript src/broad_phenotype/Create_oddsratio.R ${PATH_OUT}/${PHENO}${test_type}_sentinel_variants.txt ${PATH_OUT}/${PHENO}_${test_type_underscore}sentinel_variants_OR.txt</code></pre>
+<p>Code: src/create_input_munge_summary_stats.R</p>
+<pre class="r"><code>#!/usr/bin/env Rscript
+
+library(data.table)
+library(tidyverse)
+
+args = commandArgs(trailingOnly=TRUE)
+df_file &lt;- args[1]
+pheno &lt;- as.character(args[2])
+
+df &lt;- fread(df_file,header=F)
+
+#CHROM GENPOS ID ALLELE0 ALLELE1 A1FREQ INFO N TEST BETA SE CHISQ LOG10P
+#REGENIE: reference allele (allele 0), alternative allele (allele 1)
+#REGENIE:  estimated effect sizes (for allele 1 on the original scale)
+
+colnames(df) &lt;- c(&quot;CHROM&quot;, &quot;GENPOS&quot;, &quot;ID&quot;, &quot;ALLELE0&quot;, &quot;ALLELE1&quot;, &quot;A1FREQ&quot;, &quot;INFO&quot;, &quot;N&quot;,&quot;TEST&quot;, &quot;BETA&quot;, &quot;SE&quot;, &quot;CHISQ&quot;, &quot;LOG10P&quot;)
+dfclean &lt;- df %&gt;% select(CHROM,ID,GENPOS,ALLELE1,ALLELE0,A1FREQ,LOG10P,BETA,SE)
+
+dfclean$pval &lt;- 10^(-dfclean$LOG10P)
+
+#select column in order:
+dfclean &lt;- dfclean %&gt;% select(ID,CHROM,GENPOS,ALLELE1,ALLELE0,BETA,SE,A1FREQ,pval)
+
+#rename columns :
+colnames(dfclean) &lt;- c(&quot;snpid&quot;, &quot;b37chr&quot;, &quot;bp&quot;, &quot;a1&quot;, &quot;a2&quot;, &quot;LOG_ODDS&quot;, &quot;se&quot;, &quot;eaf&quot;, &quot;pval&quot;)
+#save gwas all chr results:
+
+#write.table(dfclean,paste0(&quot;output/&quot;,pheno,&quot;_betase_input_mungestat&quot;),quote=FALSE,sep=&quot;\t&quot;,row.names=FALSE)
+
+
+#make sure eaf column is numeric:
+dfclean$eaf &lt;- as.numeric(dfclean$eaf)
+
+#create MAF columns and filtered out for MAF &gt;= 0.01:
+dfclean &lt;- dfclean %&gt;% mutate(MAF = ifelse(dfclean$eaf &lt;= 0.5, dfclean$eaf, 1 - dfclean$eaf))
+dfclean_MAF001 &lt;- dfclean %&gt;% filter(MAF &gt;= 0.01)
+
+#save gaws results for variants with MAF &gt;= 0.01:
+write.table(dfclean_MAF001,paste0(&quot;output/maf001_&quot;,pheno,&quot;_betase_input_mungestat&quot;),quote=FALSE,sep=&quot;\t&quot;,row.names=FALSE)</code></pre>
 </div>
 <div id="genotype-and-imputation-data" class="section level2">
 <h2>Genotype and Imputation data</h2>

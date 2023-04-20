@@ -38,6 +38,9 @@ Code: src/broad_phenotype/run_regenie_step2.sh
 Code: src/broad_phenotype/postGWAS_analyses.sh
 ```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/broad_phenotype/postGWAS_analyses.sh'), eval=FALSE}
 ```
+Code: src/create_input_munge_summary_stats.R
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/create_input_munge_summary_stats.R'), eval=FALSE}
+```
 
 ## Genotype and Imputation data
 UK Biobank individuals were genotyped using the UK Biobank Axiom Array including 825,927 variants53. Imputed data for ~93M autosomal variants53 were obtained using a combined reference panel inclusive of the Haplotype Reference Consortium panel7, the UK10K8 and 1000GP Phase 39.
