@@ -1586,7 +1586,7 @@ border-radius: 0px;
 
 <h1 class="title toc-ignore">Association analysis</h1>
 <h4 class="author">Nomei Nicole Piga</h4>
-<h4 class="date">20 April, 2023</h4>
+<h4 class="date">21 April, 2023</h4>
 
 </div>
 
@@ -1933,6 +1933,130 @@ dfclean_MAF001 &lt;- dfclean %&gt;% filter(MAF &gt;= 0.01)
 
 #save gaws results for variants with MAF &gt;= 0.01:
 write.table(dfclean_MAF001,paste0(&quot;output/maf001_&quot;,pheno,&quot;_betase_input_mungestat&quot;),quote=FALSE,sep=&quot;\t&quot;,row.names=FALSE)</code></pre>
+<p>Code: src/REGENIE_plots.R</p>
+<pre class="r"><code>#!/usr/bin/env Rscript
+library(qqman) #qq plot and manhattan plot
+library(ggplot2)
+library(data.table)
+library(grid)
+library(tidyverse)
+#call the plot_functions.R for QQ-plot,Manhattan and lambda:
+source(&quot;src/plot_functions.R&quot;)
+
+args = commandArgs(TRUE)
+
+
+#inputfile:
+input_file = args[1] #input mungestat file
+pheno = args[2]
+ldsc_intercept = as.numeric(args[3])
+#input
+meta &lt;- fread(input_file, header=T, fill=T)
+
+title_plot &lt;- paste0(&quot;GWAS_&quot;,pheno)
+
+
+#QQ plot with qqman package: one genome-wide for each test-statistic p-val:
+#plot.qqplot(pval_vec = meta$pval, title= title_plot)
+
+
+#Manhattan plot:
+# require these columns: rs,chr,ps,pval
+df &lt;- meta %&gt;% select(snpid,b37chr,bp,pval)
+colnames(df) &lt;- c(&quot;rs&quot;,&quot;chr&quot;,&quot;ps&quot;,&quot;pval&quot;)
+df$chr &lt;- as.numeric(df$chr)
+df$ps &lt;- as.numeric(df$ps)
+plot.Manha(df, title = title_plot)
+
+
+#Lambda (inflation of genetic factor) from pval:
+#lambda &lt;- lambda_func(meta$pval, title = title_plot)
+
+if (ldsc_intercept &gt;= 1.05) {
+    print(&quot;Correct for lambda &gt;= 1.05&quot;)
+    meta$se_gc &lt;- meta$SE * sqrt(as.numeric(ldsc_intercept))
+    z &lt;- -abs(meta$BETA/meta$se_gc)
+    meta$pval_gc &lt;- 2*pnorm(z)
+    title_plot &lt;- paste0(&quot;gc_GWAS_&quot;,pheno)
+    #QQ plot:
+    plot.qqplot(pval_vec = meta$pval_gc, title= title_plot)
+    #Manhattan plot:
+    df &lt;- meta %&gt;% select(ID,CHROM,GENPOS,pval_gc)
+    colnames(df) &lt;- c(&quot;rs&quot;,&quot;chr&quot;,&quot;ps&quot;,&quot;pval&quot;)
+    df$chr &lt;- as.numeric(df$chr)
+    df$ps &lt;- as.numeric(df$ps)
+    plot.Manha(df, title = title_plot)
+}</code></pre>
+<p>Code: src/plot_functions.R</p>
+<pre class="r"><code>#Plot inflation plot with qqman package and qq() function.
+plot.qqplot &lt;- function(pval_vec,title){
+           filename = paste0(&quot;output/Q-Q_plot_&quot;,title,&quot;.png&quot;)
+           plot_title = paste0(&quot;Q-Q plot &quot;,title)
+           png(filename, width = 480, height = 480, units = &quot;px&quot;, pointsize = 12, bg = &quot;white&quot;)
+               print(qq(pval_vec, main = plot_title, xlim = c(0,27), ylim = c(0,27), cex.axis = 1, cex = 1, las = 1)) #function from qqman library
+               dev.off()
+}
+
+# Create a Manhattan plot from a data frame containing the results of
+# a GEMMA association analysis.
+plot.Manha &lt;- function (dataset,test_type,title) {
+          colnames(dataset) &lt;- c(&quot;SNP&quot;,&quot;CHR&quot;,&quot;BP&quot;,&quot;P&quot;) #the Manhattan function needs this format
+              filename &lt;- paste0(&quot;output/Manhattan_plot_&quot;,title,&quot;.png&quot;)
+              plot_title = paste0(&quot;Manhattan plot &quot;,title)
+          png(filename, width = 3200, height = 550, units = &quot;px&quot;, pointsize = 12, bg = &quot;white&quot;)
+          manhattan(dataset, main = title, col = c(&quot;lightblue&quot;,&quot;blue3&quot;), chrlabs = as.character(c(1:22)), ylim=c(0,25),
+          cex = 1.5, cex.axis = 1.5, suggestiveline = F, genomewideline = F, cex.lab = 1.5)
+          #function from qqman library
+          abline(h=-log10(0.00000005),lty=&quot;dashed&quot;,col=&quot;black&quot;)
+          abline(h=-log10(0.000005),lty=&quot;solid&quot;,col=&quot;black&quot;)
+          dev.off()
+}
+
+
+
+
+
+#Estimate lambda using pval:
+lambda_func &lt;- function(pval,title){
+        filename &lt;- paste0(&quot;output/lambda_&quot;,title,&quot;.txt&quot;)
+        pval &lt;- qnorm(pval/2)
+        lambda_frompval = round(median(pval^2,na.rm=T)/qchisq(0.5,df=1),2)
+        write.table(lambda_frompval,filename,col.names=&quot;lambda&quot;,row.names=F)
+        return
+        lambda_frompval
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Create a simple Manhattan plot from a data frame containing the
+# results of a GEMMA association analysis, in which p-values are
+# plotted against base-pair positions (in Mb).
+plot.region.pvalues &lt;- function (gwscan, size = 1) {
+
+  # Convert the p-values to the -log10 scale.
+  gwscan &lt;- transform(gwscan,p_lrt = -log10(p_lrt))
+
+  # Convert the positions to the Megabase (Mb) scale.
+  gwscan &lt;- transform(gwscan,ps = ps/1e6)
+  
+  # Create a Manhattan plot.
+  return(ggplot(gwscan,aes(x = ps,y = p_lrt)) +
+         geom_point(color = &quot;darkblue&quot;,size = size,shape = 20) +
+         labs(x = &quot;base-pair position (Mb)&quot;,y = &quot;-log10 p-value&quot;) +
+         theme_cowplot(font_size = 10) +
+         theme(axis.line = element_blank()))
+}</code></pre>
 </div>
 <div id="genotype-and-imputation-data" class="section level2">
 <h2>Genotype and Imputation data</h2>
