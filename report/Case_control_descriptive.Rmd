@@ -14,7 +14,12 @@ output:
 ```{r, setup, hide = TRUE}
 #library reticulate to be able to add chuncks in another language
 library(reticulate)
+```
+
+```{bash, hide = TRUE, eval = FALSE}
 # To run this .rmd file in a terminal being in the project folder:
+#module unload R/4.2.1
+#module load R/4.1.0
 #export PATH=${PATH}:/cm/shared/apps/R/deps/rstudio/bin/pandoc
 #file="./report/Case_control_descriptive.Rmd"
 #module unload R/4.2.1
@@ -94,6 +99,23 @@ In order to investigate my case-control cohort, I compared demographic informati
 # Results
 I obtained 4,021 individuals with hospitalisation and 45 individuals with death primarily due to asthma. I merged this result with the European individuals within British Thoracic Society (BTS) stage 4-5 obtaining a final number of 7,681 cases. I selected five age- and sex-matched controls for every case, obtaining 38,405 European controls.
 <br>
-Overall, the mean age is 57 years old. The dataset has a higher proportion of females compared to males (63.95% vs 36.05%). Cases exhibit higher BMI, lower lung function, and higher blood cell counts of eosinophils and neutrophils compared to controls. There are a similar proportion of smokers and non-smokers between cases and controls. Amongst cases, 61.82% self-report adult-onset asthma, 8.37% have been hospitalised with asthma as primary cause at least once, and 66.70% have been prescribed for prednisolone at least onc (see 'Probation' Table1).
+Overall, the mean age is 57 years old. The dataset has a higher proportion of females compared to males (63.95% vs 36.05%). Cases exhibit higher BMI, lower lung function, and higher blood cell counts of eosinophils and neutrophils compared to controls. There are a more smokers for cases than for controls. Amongst cases, 61.82% self-report adult-onset asthma, 8.37% have been hospitalised with asthma as primary cause at least once, and 66.70% have been prescribed for prednisolone at least once (see 'Probation' Table1).
+
+
+```{r, setup, hide = TRUE}
+library(kableExtra)
+library(readxl)
+demo <- read_xlsx("/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/data/Descriptive_table_EUR.xlsx", sheet="Descriptive_broadsevereasthma")
+colnames(demo)[1] <-"Traits"
+colnames(demo)[2] <- "Sub-traits"
+demo <- demo[-c(1,3,7),]
+#https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html#Grouped_Columns__Rows help here
+kbl(demo) %>% 
+  kable_paper("striped", full_width = F) %>%
+  pack_rows("Age, years", 1,10) %>%
+  pack_rows("Sex", 2,3)
+  
+
+```
 
 # Conclusion
