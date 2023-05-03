@@ -35,3 +35,6 @@ dos2unix broad_pheno_cov_EUR_file.R
 chmod o+x broad_pheno_cov_EUR_file.R
 Rscript broad_pheno_cov_EUR_file.R
 
+dos2unix src/broad_phenotype/case_control_descriptive.R
+chmod o+x src/broad_phenotype/case_control_descriptive.R
+Rscript src/broad_phenotype/case_control_descriptive.R > /data/gen1/UKBiobank_500K/severe_asthma/Noemi_PhD/data/broad_pheno_descriptive_report
