@@ -19,15 +19,6 @@ demo$smoking_status <- as.factor(demo$smoking_status)
 demo$broad_pheno_1_5_ratio <- as.factor(demo$broad_pheno_1_5_ratio)
 demo <- demo %>% filter(!is.na(broad_pheno_1_5_ratio))
 
-#hospitalisation:
-hesin <- read.table(paste0(path_prefix,"data/QC_hesin_diag_asthma.txt"),sep="\t",header=TRUE) %>%
-         select(app56607_ids, level) %>% unique()
-colnames(hesin) <- c("eid","hesin")
-hesin$eid<- as.factor(hesin$eid)
-hesin$hesin <- as.factor(hesin$hesin)
-
-demo_hesin <- left_join(demo,hesin,by="eid")
-
 #eosinophil:
 eos <- fread(paste0(path_prefix,"data/Eosinophill_count_30150.csv"))
 colnames(eos) <- c("eid","eos1","eos2","eso3")
@@ -62,20 +53,6 @@ demo <- demo %>% mutate(ubiopred_smk = ifelse((demo$pack_per_year_threshold == "
                                                       ifelse(demo$smoking_status == 2, "smoker",
                                                       ifelse(demo$pack_per_year_threshold == "equal_or_more_than_5" & demo$smoking_status == 1, "smoker", NA))))
 
-#Prednisolone use:
-eid_pred <- fread(paste0(path_prefix,"data/all_UKBB_with_prednisolone_gp_scripts_edit"))
-eid_scripts <- fread(paste0(path_prefix,"data/all_UKBB_with_any_gp_scripts_edit"))
-eid_pred$pred_use <- as.factor(1)
-eid_scripts$scripts <- as.factor(1)
-eid_pred$V1 <- as.factor(eid_pred$V1)
-eid_scripts$V1 <- as.factor(eid_scripts$V1)
-eid_script_pred <- left_join(eid_scripts,eid_pred,by="V1")
-eid_script_pred <- eid_script_pred %>% mutate(pred_use = ifelse(is.na(eid_script_pred$pred_use), 0, 1))
-colnames(eid_script_pred)[1] <- "eid"
-eid_script_pred$eid <- as.factor(eid_script_pred$eid)
-eid_script_pred <- eid_script_pred %>% select(eid,pred_use)
-demo <- left_join(demo,eid_script_pred,by="eid")
-
 
 ##Hay fever-rhinitis, eczema/atopic dermatitis:
 allergy <- fread("/data/gen1/UKBiobank_500K/severe_asthma/Noemi_PhD/data/eid_union_hayfev_rhinitis_eczema_derma_ATLEAST_1_evidence.txt",header=F)
@@ -85,9 +62,26 @@ allergy$eid <- as.character(allergy$eid)
 allergy$allergy <- as.factor("1")
 demo_allergy <- left_join(demo,allergy,by="eid")
 
+#Lung function from Kath file:
+bridge_app648_8389 <- fread("/data/gen1/UKBiobank/application_648/mapping_to_app8389.txt",header=T)
+bridge_app648_8389$app8389 <- as.character(bridge_app648_8389$app8389)
+bridge_app648_8389$app648 <- as.character(bridge_app648_8389$app648)
+#awk '{print $1, $52}' /data/gen1/UKBiobank_500K/severe_asthma/data/ukbiobank_master_app56607.sample \
+#    > /data/gen1/UKBiobank_500K/severe_asthma/data/bridge_app648_56607
+bridge_app648_56607 <- fread("/data/gen1/UKBiobank_500K/severe_asthma/data/bridge_app648_56607",sep=" ",header=T)
+colnames(bridge_app648_56607) <- c("app648","app56607")
+bridge_app648_56607$app56607 <- as.character(bridge_app648_56607$app56607)
+bridge_app648_56607$app648 <- as.character(bridge_app648_56607$app648)
+bridge_648_8389_56607 <- inner_join(bridge_app648_8389,bridge_app648_56607,by="app648")
 
+perc_pred_fev1_kath <- fread("/data/gen1/UKBiobank_500K/severe_asthma/data/percent_pred_fev1.txt",header=T)
+fev1_fvc_kath <- fread("/data/gen1/UKBiobank_500K/severe_asthma/data/ff.txt",header=T)
+LF_kath <- inner_join(perc_pred_fev1_kath,fev1_fvc_kath,by="ID_1") %>% rename(app648=ID_1)
+LF_kath$app648 <- as.character(LF_kath$app648)
+LF_kath_app56607 <- left_join(LF_kath, bridge_648_8389_56607, by="app648") %>% select(app56607,fev1_perc_pred,ff.best) %>% rename(eid=app56607)
+demo_LF_kath <- left_join(demo,LF_kath_app56607,by="eid")
 
-#Test continuous variable with Wilcox Mann-Whitney test:
+print("Test continuous variable with Wilcox Mann-Whitney test:")
 #age :
 print("Age")
 wilcox.test(demo$age_at_recruitment~demo$broad_pheno_1_5_ratio)
@@ -98,11 +92,12 @@ wilcox.test(demo$BMI~demo$broad_pheno_1_5_ratio)
 
 #FEV1 % predicted
 print("FEV1 % predicted")
-wilcox.test(demo$perc_pred_FEV1~demo$broad_pheno_1_5_ratio)
+wilcox.test(demo_LF_kath$fev1_perc_pred~demo_LF_kath$broad_pheno_1_5_ratio)
+
 
 #ratio_FEV1_FVC
 print("ratio FEV1 FVC")
-wilcox.test(demo$ratio_FEV1_FVC~demo$broad_pheno_1_5_ratio)
+wilcox.test(demo_LF_kath$ff.best~demo_LF_kath$broad_pheno_1_5_ratio)
 
 #eosinophil:
 print("eosinophil")
@@ -112,28 +107,16 @@ wilcox.test(demo_eos$max_eos~demo_eos$broad_pheno_1_5_ratio)
 print("neutrophil")
 wilcox.test(demo_neu$max_neu~demo_eos$broad_pheno_1_5_ratio)
 
-#Test categorical variable with chiqs.test():
+print("Test categorical variable with chi-square test:")
+print("NB: Category onset, Prednisolone use, hospitalisation cannot be test as specific to cases only")
 
 #sex:
 print("sex")
 chisq.test(table(demo$genetic_sex,demo$broad_pheno_1_5_ratio))
 
-#hesin
-print("hesin")
-demo_hesin_2 <- demo_hesin %>% select(broad_pheno_1_5_ratio,hesin) %>% drop_na()
-chisq.test(table(demo_hesin_2$hesin,demo_hesin_2$broad_pheno_1_5_ratio))
-
 #Smoking status (ubiopred):
 print("smokig status")
 chisq.test(table(demo$ubiopred_smk,demo$broad_pheno_1_5_ratio))
-
-#Category onset:
-print("category onset")
-chisq.test(table(demo$category_onset,demo$broad_pheno_1_5_ratio))
-
-#Prednisolone use:
-print("prednisolone use")
-chisq.test(table(demo$pred_use,demo$broad_pheno_1_5_ratio))
 
 #Hay fever-rhinitis, eczema/atopic dermatitis:
 print("allergic condition")
