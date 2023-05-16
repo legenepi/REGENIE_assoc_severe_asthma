@@ -40,12 +40,12 @@ cat ${PATH_OUT}/header ${PATH_OUT}/chr10_input_mungestat > ${PATH_OUT}/header_ch
 
 
 #input: change i and rsid for each sentinel:
-i=3
-rsid="rs778801698"
+i=2
+rsid="rs12470864"
 
 #for the built-in software:
 #create the LD file:
-##A. create plink file for case/control cohort (as a job array) in plink2
+##A1. create plink file for case/control cohort (as a job array) in plink2
 module load plink2
 plink2 \
   --bgen /data/ukb/nobackup/imputed_v3/ukb_imp_chr${i}_v3.bgen ref-first \
@@ -64,7 +64,7 @@ plink \
     --ld-window-kb 1000 \
     --ld-window 99999 \
     --ld-window-r2 0 \
-    --out /scratch/gen1/nnp5/REGENIE_assoc/tmp_data/ld_chr${i}
+    --out /scratch/gen1/nnp5/REGENIE_assoc/tmp_data/ld_chr${i}_${rsid}
 
 ##the User-supplied LD should have columns:
 #snp1	Any SNP in your plotting region.
@@ -80,7 +80,7 @@ awk '{print $6, $3, "NA", $7}' /scratch/gen1/nnp5/REGENIE_assoc/tmp_data/ld_chr$
     > /scratch/gen1/nnp5/REGENIE_assoc/tmp_data/ld_chr${i}_locuszoom
 
 
-##using my pre-calculated LD file:
+#using my pre-calculated LD file:
 module unload R/4.2.1
 module load R/4.1.0
 module load plink
@@ -95,6 +95,43 @@ cd ${PATH_OUT}/Locuszoom_builtin/
     --delim tab --pvalcol pval --markercol snpid \
     --build hg19 \
     --plotonly --verbose
+
+##############Other ways, but I did not use them:
+#using pre-computed LD from 10k Europeans UKB:
+##Calculate ld in plink v1.9b for 10k Eur-UKB:
+##rs778801698 is not present in these 10k eur-ukb !!
+module unload plink2
+module load plink
+plink \
+    --bfile /data/gen1/LF_HRC_transethnic/LD_reference/EUR_UKB/ukb_imp_chr${i}_EUR_selected_nodups\
+    --r2 \
+    --ld-snp ${rsid} \
+    --ld-window-kb 1000 \
+    --ld-window 99999 \
+    --ld-window-r2 0 \
+    --out /scratch/gen1/nnp5/REGENIE_assoc/tmp_data/ukb10k_EUR_ld_chr${i}
+
+echo "snp1 snp2 dprime rsquare" > /scratch/gen1/nnp5/REGENIE_assoc/tmp_data/header_ld
+awk '{print $6, $3, "NA", $7}' /scratch/gen1/nnp5/REGENIE_assoc/tmp_data/ukb10k_EUR_ld_chr${i}.ld | \
+    tail -n +2 | \
+    cat /scratch/gen1/nnp5/REGENIE_assoc/tmp_data/header_ld - \
+    > /scratch/gen1/nnp5/REGENIE_assoc/tmp_data/ukb10k_EUR_ld_chr${i}_locuszoom
+
+module unload R/4.2.1
+module load R/4.1.0
+module load plink
+cd ${PATH_OUT}/Locuszoom_builtin/
+/scratch/gen1/nnp5/locuszoom/locuszoom/bin/locuszoom \
+    --metal ${PATH_OUT}/header_chr${i}_input_mungestat \
+    --refsnp ${rsid} --flank 1Mb \
+    --plotonly \
+    signifLine=7.3 \
+    --prefix EUR \
+    --ld /scratch/gen1/nnp5/REGENIE_assoc/tmp_data/ukb10k_EUR_ld_chr${i}_locuszoom \
+    --delim tab --pvalcol pval --markercol snpid \
+    --build hg19 \
+    --plotonly --verbose
+
 
 #using data from locuszoom:
 module unload R/4.2.1
