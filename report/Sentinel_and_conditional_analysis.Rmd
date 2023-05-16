@@ -22,9 +22,61 @@ library(reticulate)
 #Rscript -e 'rmarkdown::render("'$file'")'
 ```
 # Rationale
+Sentinel selection, loci, and conditional analysis for the genome-wide significant regions discovered by the GWAS on severe asthma European ancestry participants in UK Biobank.
 
 # Analysis
+Code: src/broad_phenotype/postGWAS_analyses.sh
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/broad_phenotype/postGWAS_analyses.sh'), eval=FALSE}
+```
+Code: src/create_input_munge_summary_stats.R
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/create_input_munge_summary_stats.R'), eval=FALSE}
+```
+Code: src/sentinel_selection.R
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/sentinel_selection.R'), eval=FALSE}
+```
+Code: src/broad_phenotype/Create_oddsratio.R
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/broad_phenotype/Create_oddsratio.R'), eval=FALSE}
+```
+Code: src/merge_loci.R
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/Post_GWAS/src/merge_loci.R'), eval=FALSE}
+```
+Code: Fine_mapping_severe_asthma/src/Merge_sentinel_region.sh
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/Post_GWAS/src/Merge_sentinel_region.sh'), eval=FALSE}
+```
+Code: Post_GWAS/src/GCTA_cojocond.sh
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/broad_phenotype/Create_oddsratio.R'), eval=FALSE}
+```
+## Variant and loci selection
+Variants with a p-value equal to or below the genome-wide significant threshold of 5e-8 were extracted and the sentinel variant for each genomic loci was chosen as the one with the lowest p-value in its surrounding region of 1Mb (+/- 500Kb). If some loci were less than 500Kb apart, the loci were merged.
+
+## Conditional analysis
+In order to investigate if there were other independently associated variants, I used the GCTA conditional analysis software with the --cojo-slct parameter which performs a stepwise model selection (v1.90.2beta) [1]. I analysed regions +/- 2Mb from the sentinel variants. The loci on chromosome 6 embrace the MHC region which has a complex LD structure; thus the conditional analysis is not used for this area.
+
+Finally, Locus zoom plots were created using the free online tool LocusZoom v0.12 [2] to investigate the sentinel variants, their associated genomic loci, and surrounding genes (if any).
+
+## Look-up of sentinel variants
+I compared the results in literature from GWAS Catalog [3], Shrine et al. [4], Global Biobank Meta-analysis Initiative (GBMI) [5], and Chang et al. [6].
 
 # Results
+Sentinel selections highlighted 17 loci which became 14 loci after merging nearby regions (Table 1).
+<br>
+The conditional analysis showed an additional independent variant on chromosome 10 (rs1444789) which is in linkage equilibrium with the sentinel rs201499805 (R2 0.06).
+<br>
+
+```{r, out.width='100%', out.height='200%', fig.align='center', fig.cap='Table 1.Sentinel variants summary statistics. Chr=Chromosome; GRCh37=Genome Reference Consortium Human Build 37; OR=Odds Ratio; CI=Confidence Interval.', echo = FALSE}
+knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/report/Sentinel_table.png')
+```
+<br>
+
 
 # Conclusion
+
+# Notes
+
+# References
+1.Yang et al., 2011, Am J Hum Genet, doi:10.1016/j.ajhg.2010.11.011
+2.Pruim RJ et al., 2010, Bioinformatics, doi:10.1093/bioinformatics/btq419
+3.Sollis E et al., 2022, Nucleic Acids Res, doi:10.1093/nar/gkac1010
+4.Shrine et al., 2019, Lancet Respir Med, doi:10.1016/S2213-2600(18)30389-8
+5.Tsuo, K. et al. , 2022, Cell Genomics, doi:10.1016/j.xgen.2022.100212
+6.Chang, D. et al. 2022, Sci Rep, doi: 10.1038/s41598-022-09447-8
