@@ -22,8 +22,6 @@ library(reticulate)
 #module load R/4.1.0
 #export PATH=${PATH}:/cm/shared/apps/R/deps/rstudio/bin/pandoc
 #file="./report/Case_control_descriptive.Rmd"
-#module unload R/4.2.1
-#module load R/4.1.0
 #Rscript -e 'rmarkdown::render("'$file'")'
 ```
 # Rationale
@@ -48,11 +46,11 @@ Code: control_definition.sh
 Code: control_definition_V2.sh
 ```{bash, code = readLines('/home/n/nnp5/PhD/PhD_project/UKBiobank_datafields/scripts/control_definition_V2.sh'), eval=FALSE}
 ```
-Code: pheno_cov_file.r
-```{bash, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/pheno_cov_file.r'), eval=FALSE}
+Code: broad_phenotype/broad_pheno_cov_EUR_file.R
+```{bash, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/broad_phenotype/broad_pheno_cov_EUR_file.R'), eval=FALSE}
 ```
-Code: case_control_descriptive.R
-```{bash, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/case_control_descriptive.R'), eval=FALSE}
+Code: broad_phenotype/case_control_descriptive.R
+```{bash, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/broad_phenotype/case_control_descriptive.R'), eval=FALSE}
 ```
 Cases were defined as having either:
 

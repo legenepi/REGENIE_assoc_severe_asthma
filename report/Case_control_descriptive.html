@@ -1587,7 +1587,7 @@ border-radius: 0px;
 <h1 class="title toc-ignore">Case-control dataset and descriptive
 analysis</h1>
 <h4 class="author">Noemi Nicole Piga</h4>
-<h4 class="date">05 May, 2023</h4>
+<h4 class="date">16 May, 2023</h4>
 
 </div>
 
@@ -1599,8 +1599,6 @@ library(reticulate)</code></pre>
 #module load R/4.1.0
 #export PATH=${PATH}:/cm/shared/apps/R/deps/rstudio/bin/pandoc
 #file=&quot;./report/Case_control_descriptive.Rmd&quot;
-#module unload R/4.2.1
-#module load R/4.1.0
 #Rscript -e &#39;rmarkdown::render(&quot;&#39;$file&#39;&quot;)&#39;</code></pre>
 <div id="rationale" class="section level1">
 <h1>Rationale</h1>
@@ -2203,76 +2201,36 @@ cat ${PATH_OUTPUT}/eid_union_ecb_ATLEAST_1_evidence.txt \
 grep -v -w -F -f ${PATH_DATA}/Eid_to_exclude_control_respiratoryfree.txt ${PATH_DATA}/Eid_control_asthmafree.txt \
     &gt; ${PATH_DATA}/Eid_control_respiratoryfree.txt
 </code></pre>
-<p>Code: pheno_cov_file.r</p>
+<p>Code: broad_phenotype/broad_pheno_cov_EUR_file.R</p>
 <pre class="bash"><code>#!/usr/bin/env Rscript
-
-#run this file as:
-#source /home/n/nnp5/PhD/PhD_project/UKBiobank_datafields/venv/bin/activate
-#module unload R/4.2.1
-#module load R/4.1.0
 
 #upload required libraries
 library(data.table)
 library(tidyverse)
 
-#load input:
-path_prefix_1 &lt;- &quot;/home/n/nnp5/PhD/PhD_project/UKBiobank_datafields/data/&quot;
-output_prefix &lt;- &quot;/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/data/&quot;
+broad_pheno_file &lt;- &quot;/data/gen1/UKBiobank_500K/severe_asthma/Noemi_PhD/data/eid_broad_asthma_pheno&quot;
 
-demo_file &lt;- paste0(path_prefix_1,&quot;demographics.txt&quot;)
+eur_pheno_cov_file &lt;- &quot;/data/gen1/UKBiobank_500K/severe_asthma/Noemi_PhD/data/demo_EUR_pheno_cov.txt&quot;
 
-demo &lt;- fread(demo_file,sep=&quot;\t&quot;)
+broad_pheno &lt;- fread(broad_pheno_file, header=F)
+colnames(broad_pheno) &lt;- &quot;FID&quot;
+broad_pheno$cases_broad &lt;- as.factor(1)
 
-#create pheno cols:
-demo &lt;- demo %&gt;% mutate(pheno = case_when(controls == 1 ~ 0, cases == 1 ~ 1))
-demo$pheno &lt;- as.factor(demo$pheno)
+eur_pheno_cov &lt;- fread(eur_pheno_cov_file, header=T)
 
-demo &lt;- demo %&gt;%
-  mutate(pheno_adult = ifelse(demo$pheno == 1 &amp; demo$category_onset == &#39;onset_adult&#39;, 1, as.numeric(demo$pheno_adult)))
+eur_pheno_cov_broad_pheno &lt;- left_join(eur_pheno_cov,broad_pheno,by=&quot;FID&quot;)
+eur_pheno_cov_broad_pheno_eur_cases &lt;- eur_pheno_cov_broad_pheno %&gt;% filter(clustered.ethnicity == &quot;European&quot; &amp; cases_broad == 1) %&gt;% select(FID,cases_broad)
+eur_pheno_cov_broad_pheno_eur_cases$cases_broad_EUR &lt;- as.factor(1)
 
-
-demo &lt;- demo %&gt;%
-  mutate(pheno_early = ifelse(demo$pheno == 1 &amp; demo$category_onset == &#39;onset_early&#39;, 1, as.numeric(demo$pheno_modsev_early)))
-
-demo %&gt;% filter(pheno == 1) %&gt;% count(clustered.ethnicity)
-demo %&gt;% filter(pheno_adult == 1) %&gt;% count(clustered.ethnicity)
-demo %&gt;% filter(pheno_early == 1) %&gt;% count(clustered.ethnicity)
-
-
-
-#assemble the phenotypes-covariates file
-demo$FID &lt;- demo$eid
-demo$IID &lt;- demo$eid
-
-demo &lt;- demo %&gt;% select(FID,
-                        IID,
-                        everything())
-
-demo$age2 &lt;- demo$age_at_recruitment * demo$age_at_recruitment
-
-
-
-#order as the sample file:
-sample &lt;- fread(&quot;/data/gen1/UKBiobank_500K/severe_asthma/data/ukbiobank_app56607_for_regenie.sample&quot;,header=T)
-sample &lt;- sample[-1,]
-colnames(sample) &lt;- c(&quot;FID&quot;,&quot;IID&quot;,&quot;missing&quot;,&quot;sex_sample_file&quot;)
-sample_FID_IID &lt;- sample %&gt;% select(FID, IID)
-
-sample$sex_sample_file &lt;- as.factor(sample$sex_sample_file)
-demo$genetic_sex &lt;- as.factor(demo$genetic_sex)
-
-sample_demo &lt;- left_join(sample,demo,by=c(&quot;FID&quot;,&quot;IID&quot;))
-
-write.table(sample_demo,paste0(output_prefix,&quot;demo_pheno_cov.txt&quot;),
-row.names = FALSE, col.names = TRUE ,quote=FALSE, sep=&quot; &quot;, na = &quot;NA&quot;)
+sample_demo &lt;- left_join(eur_pheno_cov,eur_pheno_cov_broad_pheno_eur_cases,by=&quot;FID&quot;)
 
 sample_demo_EUR &lt;- sample_demo %&gt;% filter(clustered.ethnicity == &#39;European&#39;)
-cases_sample_demo_EUR &lt;- sample_demo_EUR %&gt;% filter(pheno == 1)
+cases_sample_demo_EUR &lt;- sample_demo_EUR %&gt;% filter(cases_broad_EUR == 1)
 
 female_cases_count &lt;- as.numeric(summary(as.factor(cases_sample_demo_EUR$genetic_sex))[1])*5
 male_cases_count &lt;- as.numeric(summary(as.factor(cases_sample_demo_EUR$genetic_sex))[2])*5
 
-controls_sample_demo_EUR &lt;- sample_demo_EUR %&gt;% filter(pheno == 0)
+controls_sample_demo_EUR &lt;- sample_demo_EUR %&gt;% filter(controls == 1)
 
 female_controls_sample_demo_EUR &lt;- controls_sample_demo_EUR %&gt;% filter(genetic_sex == 0)
 female_controls_sample_demo_EUR &lt;- female_controls_sample_demo_EUR[1:female_cases_count,1]
@@ -2281,16 +2239,17 @@ male_controls_sample_demo_EUR &lt;- controls_sample_demo_EUR %&gt;% filter(genet
 male_controls_sample_demo_EUR &lt;- male_controls_sample_demo_EUR[1:male_cases_count,1]
 controls_eid &lt;- rbind(male_controls_sample_demo_EUR,female_controls_sample_demo_EUR)
 
-#pheno in EUR with case:control ratio 1:5 and primary prescription:
-sample_demo_EUR &lt;- sample_demo_EUR %&gt;% mutate(pheno_1_5_ratio = ifelse(sample_demo_EUR$FID %in% controls_eid$FID, 0,
-                                                                ifelse(sample_demo_EUR$cases == 1, 1, &quot;NA&quot;)))
+#broad pheno in EUR with case:control ratio 1:5 and primary prescription:
+sample_demo_EUR &lt;- sample_demo_EUR %&gt;% mutate(broad_pheno_1_5_ratio = ifelse(sample_demo_EUR$FID %in% controls_eid$FID, 0,
+                                                                ifelse(sample_demo_EUR$cases_broad_EUR == 1, 1, &quot;NA&quot;)))
 
-summary(as.factor(sample_demo_EUR$pheno_1_5_ratio)) # ok, these are the number we want
+summary(as.factor(sample_demo_EUR$broad_pheno_1_5_ratio)) # ok, these are the number we want
 
-write.table(sample_demo_EUR,paste0(output_prefix,&quot;demo_EUR_pheno_cov.txt&quot;),
+output_prefix = &quot;/data/gen1/UKBiobank_500K/severe_asthma/Noemi_PhD/data/&quot;
+write.table(sample_demo_EUR,paste0(output_prefix,&quot;demo_EUR_pheno_cov_broadasthma.txt&quot;),
 row.names = FALSE, col.names = TRUE ,quote=FALSE, sep=&quot; &quot;, na = &quot;NA&quot;)
 </code></pre>
-<p>Code: case_control_descriptive.R</p>
+<p>Code: broad_phenotype/case_control_descriptive.R</p>
 <pre class="bash"><code>#!/usr/bin/env Rscript
 
 library(tidyverse)
@@ -2301,13 +2260,13 @@ library(hablar)
 
 #load input
 path_prefix &lt;- &quot;/home/n/nnp5/PhD/PhD_project/UKBiobank_asthmaMeds_stratification/&quot;
-demo &lt;- read.table(&quot;/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/data/demo_EUR_pheno_cov.txt&quot;,header=T,sep=&quot; &quot;)
+demo &lt;- read.table(&quot;/data/gen1/UKBiobank_500K/severe_asthma/Noemi_PhD/data/demo_EUR_pheno_cov_broadasthma.txt&quot;,header=T,sep=&quot; &quot;)
 demo$eid &lt;- as.factor(demo$eid)
 demo &lt;- demo %&gt;% rename(clustered_ancestry = clustered.ethnicity)
 demo$clustered_ancestry  &lt;- as.factor(demo$clustered_ancestry)
 demo$smoking_status &lt;- as.factor(demo$smoking_status)
-demo$pheno_1_5_ratio &lt;- as.factor(demo$pheno_1_5_ratio)
-demo &lt;- demo %&gt;% filter(!is.na(pheno_1_5_ratio))
+demo$broad_pheno_1_5_ratio &lt;- as.factor(demo$broad_pheno_1_5_ratio)
+demo &lt;- demo %&gt;% filter(!is.na(broad_pheno_1_5_ratio))
 
 
 ##Plot categorical variables:
@@ -2328,25 +2287,25 @@ df %&gt;%
   theme(axis.text.x = element_text(size = 15), axis.text.y = element_text(size = 15),
   axis.title.y = element_text(size = 16), axis.title.x = element_text(size = 16),
   legend.title = element_text(size = 18), legend.text = element_text(size = 17))
-ggsave(paste0(&quot;data/EUR_case_control_&quot;,cat_var,&quot;_plot.png&quot;))
+ggsave(paste0(&quot;data/broad_pheno_EUR_case_control_&quot;,cat_var,&quot;_plot.png&quot;))
 }
 
-df &lt;- demo %&gt;% select(pheno_1_5_ratio,genetic_sex)
+df &lt;- demo %&gt;% select(broad_pheno_1_5_ratio,genetic_sex)
 df$genetic_sex &lt;- as.factor(df$genetic_sex)
 categorical_plot(df,as.character(colnames(df)[2]),&quot;Severe Asthma&quot;)
 
-df &lt;- demo %&gt;% select(pheno_1_5_ratio,sex)
+df &lt;- demo %&gt;% select(broad_pheno_1_5_ratio,sex)
 df$sex &lt;- as.factor(df$sex)
 categorical_plot(df,as.character(colnames(df)[2]),&quot;Severe Asthma&quot;)
 
-df &lt;- demo %&gt;% select(pheno_1_5_ratio,sex_sample_file)
+df &lt;- demo %&gt;% select(broad_pheno_1_5_ratio,sex_sample_file)
 df$sex_sample_file &lt;- as.factor(df$sex_sample_file)
 categorical_plot(df,as.character(colnames(df)[2]),&quot;Severe Asthma&quot;)
 
-df &lt;- demo %&gt;% select(pheno_1_5_ratio,category_onset)
+df &lt;- demo %&gt;% select(broad_pheno_1_5_ratio,category_onset)
 categorical_plot(df,as.character(colnames(df)[2]),&quot;Severe Asthma&quot;)
 
-df &lt;- demo %&gt;% select(pheno_1_5_ratio,smoking_status)
+df &lt;- demo %&gt;% select(broad_pheno_1_5_ratio,smoking_status)
 colnames(df) &lt;- c(&quot;Phenotype&quot;,&quot;smoking_status&quot;)
 df %&gt;%
   count(Phenotype,smoking_status) %&gt;%
@@ -2363,9 +2322,9 @@ df %&gt;%
   theme(axis.text.x = element_text(size = 15), axis.text.y = element_text(size = 15),
   axis.title.y = element_text(size = 16), axis.title.x = element_text(size = 16),
   legend.title = element_text(size = 18), legend.text = element_text(size = 17))
-ggsave(paste0(&quot;data/EUR_case_control_&quot;,as.character(colnames(df)[2]),&quot;_plot.png&quot;))
+ggsave(paste0(&quot;data/broad_pheno_EUR_case_control_&quot;,as.character(colnames(df)[2]),&quot;_plot.png&quot;))
 
-df &lt;- demo %&gt;% select(pheno_1_5_ratio,clustered_ancestry)
+df &lt;- demo %&gt;% select(broad_pheno_1_5_ratio,clustered_ancestry)
 colnames(df) &lt;- c(&quot;Phenotype&quot;,&quot;clustered_ancestry&quot;)
 df %&gt;%
   count(Phenotype,clustered_ancestry) %&gt;%
@@ -2382,7 +2341,7 @@ df %&gt;%
   theme(axis.text.x = element_text(size = 15), axis.text.y = element_text(size = 15),
   axis.title.y = element_text(size = 16), axis.title.x = element_text(size = 16),
   legend.title = element_text(size = 18), legend.text = element_text(size = 17))
-ggsave(paste0(&quot;data/EUR_case_control_&quot;,as.character(colnames(df)[2]),&quot;_plot.png&quot;))
+ggsave(paste0(&quot;data/broad_pheno_EUR_case_control_&quot;,as.character(colnames(df)[2]),&quot;_plot.png&quot;))
 
 #hospitalisation:
 hesin &lt;- read.table(paste0(path_prefix,&quot;data/QC_hesin_diag_asthma.txt&quot;),sep=&quot;\t&quot;,header=TRUE) %&gt;%
@@ -2392,7 +2351,7 @@ hesin$eid&lt;- as.factor(hesin$eid)
 hesin$hesin &lt;- as.factor(hesin$hesin)
 
 demo_hesin &lt;- left_join(demo,hesin,by=&quot;eid&quot;)
-df &lt;- demo_hesin %&gt;% select(pheno_1_5_ratio,hesin)
+df &lt;- demo_hesin %&gt;% select(broad_pheno_1_5_ratio,hesin)
 categorical_plot(df,as.character(colnames(df)[2]),&quot;Difficult-to-treat&quot;)
 
 
@@ -2431,25 +2390,25 @@ df %&gt;%
      theme_classic() +
      geom_text(data = means, aes(label = round(num_var,2), y = 0, fontface = &quot;bold&quot;), size = 5) +
      theme(axis.text.x = element_text(size = 15), axis.text.y = element_text(size = 15), axis.title.y = element_text(size = 16), axis.title.x = element_text(size = 16))
-ggsave(paste0(&quot;data/EUR_case_control_&quot;,num_var,&quot;_plot.png&quot;))
+ggsave(paste0(&quot;data/broad_pheno_EUR_case_control_&quot;,num_var,&quot;_plot.png&quot;))
 }
 
-df &lt;- demo %&gt;% select(pheno_1_5_ratio, perc_pred_FEV1)
+df &lt;- demo %&gt;% select(broad_pheno_1_5_ratio, perc_pred_FEV1)
 numeric_plot(df, as.character(colnames(df)[2]),&quot;Difficult-to-treat&quot;)
 
-df &lt;- demo %&gt;% select(pheno_1_5_ratio, ratio_FEV1_FVC)
+df &lt;- demo %&gt;% select(broad_pheno_1_5_ratio, ratio_FEV1_FVC)
 numeric_plot(df, as.character(colnames(df)[2]),&quot;Difficult-to-treat&quot;)
 
-df &lt;- demo %&gt;% select(pheno_1_5_ratio,best_FEV1)
+df &lt;- demo %&gt;% select(broad_pheno_1_5_ratio,best_FEV1)
 numeric_plot(df, as.character(colnames(df)[2]),&quot;Difficult-to-treat&quot;)
 
-df &lt;- demo %&gt;% select(pheno_1_5_ratio,BMI)
+df &lt;- demo %&gt;% select(broad_pheno_1_5_ratio,BMI)
 numeric_plot(df, as.character(colnames(df)[2]),&quot;Difficult-to-treat&quot;)
 
-df &lt;- demo %&gt;% select(pheno_1_5_ratio,age_at_recruitment)
+df &lt;- demo %&gt;% select(broad_pheno_1_5_ratio,age_at_recruitment)
 numeric_plot(df, as.character(colnames(df)[2]),&quot;Difficult-to-treat&quot;)
 
-df &lt;- demo %&gt;% select(pheno_1_5_ratio,cigarette_pack_years)
+df &lt;- demo %&gt;% select(broad_pheno_1_5_ratio,cigarette_pack_years)
 numeric_plot(df, as.character(colnames(df)[2]),&quot;Difficult-to-treat&quot;)
 
 #eosinophil:
@@ -2457,14 +2416,14 @@ eos &lt;- fread(paste0(path_prefix,&quot;data/Eosinophill_count_30150.csv&quot;)
 colnames(eos) &lt;- c(&quot;eid&quot;,&quot;eos1&quot;,&quot;eos2&quot;,&quot;eso3&quot;)
 eos$eid &lt;- as.factor(eos$eid)
 
-demo_eos &lt;- left_join(demo,eos,by=&quot;eid&quot;) %&gt;% select(pheno_1_5_ratio,eos1,eos2,eso3)
+demo_eos &lt;- left_join(demo,eos,by=&quot;eid&quot;) %&gt;% select(broad_pheno_1_5_ratio,eos1,eos2,eso3)
 
 demo_eos &lt;- demo_eos %&gt;%
   rowwise() %&gt;%
-  mutate(min_eos = min_(c_across(-pheno_1_5_ratio)),
-         max_eos = max_(c_across(-pheno_1_5_ratio)))
+  mutate(min_eos = min_(c_across(-broad_pheno_1_5_ratio)),
+         max_eos = max_(c_across(-broad_pheno_1_5_ratio)))
 
-df &lt;- demo_eos %&gt;% select(pheno_1_5_ratio,max_eos)
+df &lt;- demo_eos %&gt;% select(broad_pheno_1_5_ratio,max_eos)
 numeric_plot(df, as.character(colnames(df)[2]),&quot;Difficult-to-treat&quot;)
 
 #neutrophil:
@@ -2472,14 +2431,14 @@ neu &lt;- fread(paste0(path_prefix,&quot;data/Neutrophill_count_30140.csv&quot;)
 colnames(neu) &lt;- c(&quot;eid&quot;,&quot;neu1&quot;,&quot;neu2&quot;,&quot;eso3&quot;)
 neu$eid &lt;- as.factor(neu$eid)
 
-demo_neu &lt;- left_join(demo,neu,by=&quot;eid&quot;) %&gt;% select(pheno_1_5_ratio,neu1,neu2,eso3)
+demo_neu &lt;- left_join(demo,neu,by=&quot;eid&quot;) %&gt;% select(broad_pheno_1_5_ratio,neu1,neu2,eso3)
 
 demo_neu &lt;- demo_neu %&gt;%
   rowwise() %&gt;%
-  mutate(min_neu = min_(c_across(-pheno_1_5_ratio)),
-         max_neu = max_(c_across(-pheno_1_5_ratio)))
+  mutate(min_neu = min_(c_across(-broad_pheno_1_5_ratio)),
+         max_neu = max_(c_across(-broad_pheno_1_5_ratio)))
 
-df &lt;- demo_neu %&gt;% select(pheno_1_5_ratio,max_neu)
+df &lt;- demo_neu %&gt;% select(broad_pheno_1_5_ratio,max_neu)
 numeric_plot(df, as.character(colnames(df)[2]),&quot;Difficult-to-treat&quot;)
 
 
@@ -2495,7 +2454,7 @@ demo &lt;- demo %&gt;% mutate(ubiopred_smk = ifelse((demo$pack_per_year_threshol
                                                       ifelse(demo$smoking_status == 2, &quot;smoker&quot;,
                                                       ifelse(demo$pack_per_year_threshold == &quot;equal_or_more_than_5&quot; &amp; demo$smoking_status == 1, &quot;smoker&quot;, NA))))
 
-df &lt;- demo %&gt;% select(pheno_1_5_ratio,ubiopred_smk)
+df &lt;- demo %&gt;% select(broad_pheno_1_5_ratio,ubiopred_smk)
 df$ubiopred_smk &lt;- as.factor(df$ubiopred_smk)
 categorical_plot(df,as.character(colnames(df)[2]),&quot;Difficult-to-treat&quot;)
 
@@ -2515,14 +2474,14 @@ demo &lt;- left_join(demo,eid_script_pred,by=&quot;eid&quot;)
 
 #Find number for descriptive table:
 #case-control:
-print(&quot;Cases-control&quot;)
-summary(demo$pheno_1_5_ratio)
-prop.table(table(demo$pheno_1_5_ratio))
+print(&quot;Cases-control broad phenotype&quot;)
+summary(demo$broad_pheno_1_5_ratio)
+prop.table(table(demo$broad_pheno_1_5_ratio))
 
-cases &lt;- demo %&gt;% filter(pheno_1_5_ratio == 1)
-controls &lt;- demo %&gt;% filter(pheno_1_5_ratio == 0)
+cases &lt;- demo %&gt;% filter(broad_pheno_1_5_ratio == 1)
+controls &lt;- demo %&gt;% filter(broad_pheno_1_5_ratio == 0)
 
-print(&quot;Summary statistics - cases and controls&quot;)
+print(&quot;Summary statistics broad phenotype - cases and controls&quot;)
 
 #sex:
 print(&quot;Sex : count and percentage&quot;)
@@ -2600,14 +2559,14 @@ sd(df$best_FEV1)
 ##blood cell count
 #eosinophil:
 print(&quot;Eosinophils: mean and SD&quot;)
-demo_eos_cases &lt;- demo_eos %&gt;% filter(pheno_1_5_ratio == 1)
+demo_eos_cases &lt;- demo_eos %&gt;% filter(broad_pheno_1_5_ratio == 1)
 df &lt;- demo_eos_cases %&gt;% filter(!is.na(max_eos))
 df &lt;- remove_outliers(df, &#39;max_eos&#39;)
 print(&quot;Cases&quot;)
 mean(df$max_eos)
 sd(df$max_eos)
 
-demo_eos_controls &lt;- demo_eos %&gt;% filter(pheno_1_5_ratio == 0)
+demo_eos_controls &lt;- demo_eos %&gt;% filter(broad_pheno_1_5_ratio == 0)
 df &lt;- demo_eos_controls %&gt;% filter(!is.na(max_eos))
 df &lt;- remove_outliers(df, &#39;max_eos&#39;)
 print(&quot;Controls&quot;)
@@ -2616,14 +2575,14 @@ sd(df$max_eos)
 
 #neutrophils:
 print(&quot;Neutrophils: mean and SD&quot;)
-demo_neu_cases &lt;- demo_neu %&gt;% filter(pheno_1_5_ratio == 1)
+demo_neu_cases &lt;- demo_neu %&gt;% filter(broad_pheno_1_5_ratio == 1)
 df &lt;- demo_neu_cases %&gt;% filter(!is.na(max_neu))
 df &lt;- remove_outliers(df, &#39;max_neu&#39;)
 print(&quot;Cases&quot;)
 mean(df$max_neu)
 sd(df$max_neu)
 
-demo_neu_controls &lt;- demo_neu %&gt;% filter(pheno_1_5_ratio == 0)
+demo_neu_controls &lt;- demo_neu %&gt;% filter(broad_pheno_1_5_ratio == 0)
 df &lt;- demo_neu_controls %&gt;% filter(!is.na(max_neu))
 df &lt;- remove_outliers(df, &#39;max_neu&#39;)
 print(&quot;Controls&quot;)
@@ -2632,12 +2591,12 @@ sd(df$max_neu)
 
 #Hospitalisation:
 print(&quot;Hospitalisation: count and percentage&quot;)
-demo_hesin_cases &lt;- left_join(demo,hesin,by=&quot;eid&quot;) %&gt;% filter(pheno_1_5_ratio == 1)
+demo_hesin_cases &lt;- left_join(demo,hesin,by=&quot;eid&quot;) %&gt;% filter(broad_pheno_1_5_ratio == 1)
 print(&quot;Cases&quot;)
 table(demo_hesin_cases$hesin,exclude=NULL)
 prop.table(table(demo_hesin_cases$hesin,exclude=NULL))
 print(&quot;Controls&quot;)
-demo_hesin_controls &lt;- left_join(demo,hesin,by=&quot;eid&quot;) %&gt;% filter(pheno_1_5_ratio == 0)
+demo_hesin_controls &lt;- left_join(demo,hesin,by=&quot;eid&quot;) %&gt;% filter(broad_pheno_1_5_ratio == 0)
 table(demo_hesin_controls$hesin,exclude=NULL)
 prop.table(table(demo_hesin_controls$hesin,exclude=NULL))
 
@@ -2671,23 +2630,23 @@ table(controls$pred_use,exclude = NULL)
 prop.table(table(controls$pred_use,exclude = NULL))
 
 #Percent predicted FEV1 by prednisolone use:
-df &lt;- demo %&gt;% filter(pheno_1_5_ratio == 1) %&gt;% select(pred_use, perc_pred_FEV1) %&gt;% rename(perc_pred_FEV1_by_pred_use=perc_pred_FEV1)
+df &lt;- demo %&gt;% filter(broad_pheno_1_5_ratio == 1) %&gt;% select(pred_use, perc_pred_FEV1) %&gt;% rename(perc_pred_FEV1_by_pred_use=perc_pred_FEV1)
 df$pred_use &lt;- as.factor(df$pred_use)
 numeric_plot(df, as.character(colnames(df)[2]),&quot;Prednisolone use&quot;)
 
 #ratio_FEV1_FVC by prednisolone use:
-df &lt;- demo %&gt;% filter(pheno_1_5_ratio == 1) %&gt;% select(pred_use, ratio_FEV1_FVC) %&gt;% rename(ratio_FEV1_FVC_by_pred_use=ratio_FEV1_FVC)
+df &lt;- demo %&gt;% filter(broad_pheno_1_5_ratio == 1) %&gt;% select(pred_use, ratio_FEV1_FVC) %&gt;% rename(ratio_FEV1_FVC_by_pred_use=ratio_FEV1_FVC)
 df$pred_use &lt;- as.factor(df$pred_use)
 numeric_plot(df, as.character(colnames(df)[2]),&quot;Prednisolone use&quot;)
 
 #Best_FEV1 by prednisolone use:
-df &lt;- demo %&gt;% filter(pheno_1_5_ratio == 1) %&gt;% select(pred_use, best_FEV1) %&gt;% rename(best_FEV1_by_pred_use=best_FEV1)
+df &lt;- demo %&gt;% filter(broad_pheno_1_5_ratio == 1) %&gt;% select(pred_use, best_FEV1) %&gt;% rename(best_FEV1_by_pred_use=best_FEV1)
 df$pred_use &lt;- as.factor(df$pred_use)
 numeric_plot(df, as.character(colnames(df)[2]),&quot;Prednisolone use&quot;)
 
 #hesin by prednisolone use:
 demo_hesin &lt;- left_join(demo,hesin,by=&quot;eid&quot;)
-df &lt;- demo_hesin %&gt;% filter(pheno_1_5_ratio == 1) %&gt;% select(pred_use, hesin) %&gt;% rename(hesin_by_pred_use=hesin)
+df &lt;- demo_hesin %&gt;% filter(broad_pheno_1_5_ratio == 1) %&gt;% select(pred_use, hesin) %&gt;% rename(hesin_by_pred_use=hesin)
 df$pred_use &lt;- as.factor(df$pred_use)
 categorical_plot(df,as.character(colnames(df)[2]),&quot;Prednisolone use&quot;)
 
@@ -2710,8 +2669,8 @@ LF_kath &lt;- inner_join(perc_pred_fev1_kath,fev1_fvc_kath,by=&quot;ID_1&quot;) 
 LF_kath$app648 &lt;- as.character(LF_kath$app648)
 LF_kath_app56607 &lt;- left_join(LF_kath, bridge_648_8389_56607, by=&quot;app648&quot;) %&gt;% select(app56607,fev1_perc_pred,ff.best) %&gt;% rename(eid=app56607)
 demo_LF_kath &lt;- left_join(demo,LF_kath_app56607,by=&quot;eid&quot;)
-cases &lt;- demo_LF_kath %&gt;% filter(pheno_1_5_ratio == 1)
-controls &lt;- demo_LF_kath %&gt;% filter(pheno_1_5_ratio == 0)
+cases &lt;- demo_LF_kath %&gt;% filter(broad_pheno_1_5_ratio == 1)
+controls &lt;- demo_LF_kath %&gt;% filter(broad_pheno_1_5_ratio == 0)
 
 ##fev1_perc_pred
 print(&quot;fev1_perc_pred (From Kath data): mean and SD&quot;)
@@ -2741,22 +2700,21 @@ print(&quot;Controls&quot;)
 mean(df$ff.best)
 sd(df$ff.best)
 
-df &lt;- demo_LF_kath %&gt;% select(pheno_1_5_ratio, fev1_perc_pred)
+df &lt;- demo_LF_kath %&gt;% select(broad_pheno_1_5_ratio, fev1_perc_pred)
 numeric_plot(df, as.character(colnames(df)[2]),&quot;Difficult-to-treat&quot;)
 
-df &lt;- demo_LF_kath %&gt;% select(pheno_1_5_ratio, ff.best)
+df &lt;- demo_LF_kath %&gt;% select(broad_pheno_1_5_ratio, ff.best)
 numeric_plot(df, as.character(colnames(df)[2]),&quot;Difficult-to-treat&quot;)
 
 ##Hay fever-rhinitis, eczema/atopic dermatitis:
 allergy &lt;- fread(&quot;/data/gen1/UKBiobank_500K/severe_asthma/Noemi_PhD/data/eid_union_hayfev_rhinitis_eczema_derma_ATLEAST_1_evidence.txt&quot;,header=F)
 allergy &lt;- unique(allergy)
-#write.table(allergy,&quot;/home/n/nnp5/PhD/PhD_project/UKBiobank_datafields/data/eid_union_hayfev_rhinitis_eczema_derma_ATLEAST_1_evidence.txt&quot;,quote=F,col.names=F,row.names=F)
 colnames(allergy)[1] &lt;- &quot;eid&quot;
 allergy$eid &lt;- as.character(allergy$eid)
 allergy$allergy &lt;- as.factor(&quot;1&quot;)
 
-cases &lt;- demo %&gt;% filter(pheno_1_5_ratio == 1)
-controls &lt;- demo %&gt;% filter(pheno_1_5_ratio == 0)
+cases &lt;- demo %&gt;% filter(broad_pheno_1_5_ratio == 1)
+controls &lt;- demo %&gt;% filter(broad_pheno_1_5_ratio == 0)
 
 cases_allergy &lt;- left_join(cases,allergy,by=&quot;eid&quot;)
 table(cases_allergy$allergy,exclude=NULL)
