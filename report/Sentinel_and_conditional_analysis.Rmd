@@ -25,6 +25,7 @@ library(reticulate)
 Sentinel selection, loci, and conditional analysis for the genome-wide significant regions discovered by the GWAS on severe asthma European ancestry participants in UK Biobank.
 
 # Analysis
+## Variant and loci selection
 Code: src/broad_phenotype/postGWAS_analyses.sh
 ```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/broad_phenotype/postGWAS_analyses.sh'), eval=FALSE}
 ```
@@ -43,40 +44,54 @@ Code: src/merge_loci.R
 Code: Fine_mapping_severe_asthma/src/Merge_sentinel_region.sh
 ```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/Post_GWAS/src/Merge_sentinel_region.sh'), eval=FALSE}
 ```
-Code: Post_GWAS/src/GCTA_cojocond.sh
-```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/broad_phenotype/Create_oddsratio.R'), eval=FALSE}
-```
-## Variant and loci selection
 Variants with a p-value equal to or below the genome-wide significant threshold of 5e-8 were extracted and the sentinel variant for each genomic loci was chosen as the one with the lowest p-value in its surrounding region of 1Mb (+/- 500Kb). If some loci were less than 500Kb apart, the loci were merged.
 
 ## Conditional analysis
+Code: Post_GWAS/src/GCTA_cojocond.sh
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/broad_phenotype/Create_oddsratio.R'), eval=FALSE}
+```
 In order to investigate if there were other independently associated variants, I used the GCTA conditional analysis software with the --cojo-slct parameter which performs a stepwise model selection (v1.90.2beta) [1]. I analysed regions +/- 2Mb from the sentinel variants. The loci on chromosome 6 embrace the MHC region which has a complex LD structure; thus the conditional analysis is not used for this area.
 
 Finally, Locus zoom plots were created using the free online tool LocusZoom v0.12 [2] to investigate the sentinel variants, their associated genomic loci, and surrounding genes (if any).
 
 ## Look-up of sentinel variants
-I compared the results in literature from GWAS Catalog [3], Shrine et al. [4], Global Biobank Meta-analysis Initiative (GBMI) [5], and Chang et al. [6].
+Code: Post_GWAS/src/Lookup_in_modsev_imputed.R
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/Post_GWAS/src/Lookup_in_modsev_imputed.R'), eval=FALSE}
+```
+Code: Post_GWAS/src/Lookup_in_modsev_sequencing.R
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/Post_GWAS/src/Lookup_in_modsev_sequencing.R'), eval=FALSE}
+```
+Code: Post_GWAS/src/Lookup_snps_in_GBMI_asthma.sh
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/Post_GWAS/src/Lookup_snps_in_GBMI_asthma.sh'), eval=FALSE}
+```
+Code: Post_GWAS/src/Lookup_GBMI_sentinelvars.R
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/Post_GWAS/src/Lookup_GBMI_sentinelvars.R'), eval=FALSE}
+```
+I compared the results in literature from Shrine et al. [3], Global Biobank Meta-analysis Initiative (GBMI) [4], and Chang et al. [5].
 
 # Results
 Sentinel selections highlighted 17 loci which became 14 loci after merging nearby regions (Table 1).
 <br>
 The conditional analysis showed an additional independent variant on chromosome 10 (rs1444789) which is in linkage equilibrium with the sentinel rs201499805 (R2 0.06).
 <br>
-
-```{r, out.width='100%', out.height='200%', fig.align='center', fig.cap='Table 1.Sentinel variants summary statistics. Chr=Chromosome; GRCh37=Genome Reference Consortium Human Build 37; OR=Odds Ratio; CI=Confidence Interval.', echo = FALSE}
+```{r, out.width='100%', out.height='200%', fig.align='center', fig.cap='Table 1.Sentinel variants summary statistics. Chr=Chromosome; GRCh37=Genome Reference Consortium Human Build 37; OR=Odds Ratio; 95CI=Confidence Interval.', echo = FALSE}
 knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/report/Sentinel_table.png')
 ```
 <br>
-
+The three studies used for the look-up analyses revealed that 12 out of 14 loci has been already found associated with asthma or moderate-to-severe asthma (Table 2).
+```{r, out.width='100%', out.height='200%', fig.align='center', fig.cap='Table 2.Look-up sentinel variants. CHR=Chromosome; BP=Base position; B37=Build 37; B38=Build 38; OR=Odds Ratio; CI=95% Confidence Interval; UKB=UK Biobank.', echo = FALSE}
+knitr::include_graphics('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/report/Lookup_Sentinel_vars.PNG')
+```
 
 # Conclusion
+The GWAS revealed 7,198 genome-wide significant variants (p-value < 5 x 10-8), which represented 14 independent loci. Twelve of these loci had been previously reported in other studies, except those tagged
+by rs778801698 and rs2523572 on chromosome 3 and 6 respectively.
 
 # Notes
 
 # References
 1.Yang et al., 2011, Am J Hum Genet, doi:10.1016/j.ajhg.2010.11.011
 2.Pruim RJ et al., 2010, Bioinformatics, doi:10.1093/bioinformatics/btq419
-3.Sollis E et al., 2022, Nucleic Acids Res, doi:10.1093/nar/gkac1010
-4.Shrine et al., 2019, Lancet Respir Med, doi:10.1016/S2213-2600(18)30389-8
-5.Tsuo, K. et al. , 2022, Cell Genomics, doi:10.1016/j.xgen.2022.100212
-6.Chang, D. et al. 2022, Sci Rep, doi: 10.1038/s41598-022-09447-8
+3.Shrine et al., 2019, Lancet Respir Med, doi:10.1016/S2213-2600(18)30389-8
+4.Tsuo, K. et al. , 2022, Cell Genomics, doi:10.1016/j.xgen.2022.100212
+5.Chang, D. et al. 2022, Sci Rep, doi: 10.1038/s41598-022-09447-8
