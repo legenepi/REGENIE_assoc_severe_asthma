@@ -1954,9 +1954,8 @@ apart, the loci were merged.</p>
 #run after Merge_sentinel_region.sh
 #create the /home/n/nnp5/PhD/PhD_project/Fine_mapping_severe_asthma/input/fine_mapping_regions_merged from Merge_sentinel_region.sh output
 ##cp /home/n/nnp5/PhD/PhD_project/Fine_mapping_severe_asthma/input/fine_mapping_regions_merged /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/
-#NB: the file is called &#39;fine_mapping_regions_merged&#39; but actually, this is not the one used for the fine-mapping !
-#I kept the name because i run the script with this name. The file for the fine-mapping with the merged region
-#is created after the conditional as I got a new variant on chromosome 10 !
+#NB: the file is called &#39;fine_mapping_regions_merged&#39; because it is the one I will use for the fine-ammping for all chromosome
+#except for chromosome 10 as I found a new independent variant with the GCTA cojo conditional analysis !
 
 #GCTA using --cojo-slct parameter
 #run as: qsub /home/n/nnp5/PhD/PhD_project/Post_GWAS/src/GCTA_cojocond.sh
