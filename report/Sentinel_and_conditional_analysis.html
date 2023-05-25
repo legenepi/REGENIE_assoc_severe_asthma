@@ -1952,13 +1952,15 @@ apart, the loci were merged.</p>
 #PBS -W umask=022
 
 #run after Merge_sentinel_region.sh
-# create the /home/n/nnp5/PhD/PhD_project/Fine_mapping_severe_asthma/input/fine_mapping_regions_merged from Merge_sentinel_region.sh output
+#create the /home/n/nnp5/PhD/PhD_project/Fine_mapping_severe_asthma/input/fine_mapping_regions_merged from Merge_sentinel_region.sh output
 ##cp /home/n/nnp5/PhD/PhD_project/Fine_mapping_severe_asthma/input/fine_mapping_regions_merged /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/
+#NB: the file is called &#39;fine_mapping_regions_merged&#39; but actually, this is not the one used for the fine-mapping !
+#I kept the name because i run the script with this name. The file for the fine-mapping with the merged region
+#is created after the conditional as I got a new variant on chromosome 10 !
+
 #GCTA using --cojo-slct parameter
 #run as: qsub /home/n/nnp5/PhD/PhD_project/Post_GWAS/src/GCTA_cojocond.sh
 
-
-sample_DIR=&quot;/data/gen1/UKBiobank_500K/severe_asthma/data&quot;
 pheno=&quot;broad_pheno&quot;
 module load plink
 
@@ -2005,8 +2007,10 @@ plink --bfile /scratch/gen1/nnp5/REGENIE_assoc/tmp_data/broad_pheno_plink_file_v
     &gt; /home/n/nnp5/PhD/PhD_project/Post_GWAS/output/rs201499805_rs1444789_ld
 
 #add new independent variant (rs1444789) to the sentinel variant:
-echo &quot;rs1444789 10 9064361 C T 0.141266 0.0240968 0.186346 4.56104e-09 0.186346&quot; | \
-    cat  ${PATH_OUT}/${PHENO}_sentinel_variants.txt</code></pre>
+##NB: sicne I have to change a space into a tab, this command needs to be run interactively and manually input the tab every time:
+echo &quot;rs1444789 10 9064361 C T 0.141266 0.0240968 0.186346 4.56104e-09 0.186346&quot; | sed &#39;s/ /        /g&#39; | \
+    cat  /home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/maf001_broad_pheno_1_5_ratio_sentinel_variants.txt - \
+    &gt;  /home/n/nnp5/PhD/PhD_project/Post_GWAS/output/SA_sentinel_variants_after_conditional.txt</code></pre>
 <p>In order to investigate if there were other independently associated
 variants, I used the GCTA conditional analysis software with the
 –cojo-slct parameter which performs a stepwise model selection
