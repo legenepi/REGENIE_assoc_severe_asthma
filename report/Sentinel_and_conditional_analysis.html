@@ -1859,7 +1859,7 @@ sumstat$&#39;OR_95_CI&#39; &lt;- paste0(format(round(sumstat$odds_ratio,2),nsmal
 sumstat &lt;- sumstat %&gt;% mutate(direction_of_effect=ifelse(sumstat$LOG_ODDS &gt; 0, &quot;+&quot;,&quot;-&quot;))
 
 write.table(sumstat,output_file,sep=&quot;\t&quot;,quote=F,row.names=F)</code></pre>
-<p>Code: src/merge_loci.R</p>
+<p>Code: Post_GWAS/src/merge_loci.R</p>
 <pre class="r"><code>sink(stderr())
 
 suppressMessages(library(GenomicRanges))
@@ -1913,7 +1913,7 @@ loci &lt;- sentinels %&gt;%
 
 sink()
 write.table(loci, output_file, row.names = F, sep = &quot;\t&quot;, quote=F)</code></pre>
-<p>Code: src/Merge_sentinel_region.sh</p>
+<p>Code: Post_GWAS/src/Merge_sentinel_region.sh</p>
 <pre class="r"><code>#!/bin/bash
 
 PATH_OUT=&quot;/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output&quot;
@@ -1931,7 +1931,7 @@ dos2unix src/merge_loci.R
 Rscript src/merge_loci.R ${PATH_OUT}/${PHENO}_sentinel_variants.txt \
     1000000 \
     500000 \
-    /home/n/nnp5/PhD/PhD_project/Fine_mapping_severe_asthma/input/fine_mapping_regions_merged</code></pre>
+    /home/n/nnp5/PhD/PhD_project/Post_GWAS/output/merged_sentinel_loci.txt</code></pre>
 <p>Variants with a p-value equal to or below the genome-wide significant
 threshold of 5e-8 were extracted and the sentinel variant for each
 genomic loci was chosen as the one with the lowest p-value in its
@@ -1940,7 +1940,72 @@ apart, the loci were merged.</p>
 </div>
 <div id="conditional-analysis" class="section level2">
 <h2>Conditional analysis</h2>
-<p>Code: src/GCTA_cojocond.sh</p>
+<p>Code: Post_GWAS/src/plink_conversion_file.sh</p>
+<pre class="r"><code>#!/bin/bash
+
+#PBS -N plink_conversion_files
+#PBS -j oe
+#PBS -o log
+#PBS -l walltime=6:0:0
+#PBS -l nodes=1:ppn=4
+#PBS -l vmem=60gb
+#PBS -W umask=022
+
+chr=$PBS_ARRAYID
+pheno=&quot;broad_pheno&quot;
+
+##requires to create the input for --keep option: --keep input/${pheno}_individuals
+## run as: qsub -t 4,7,13,16,19,21,22 src/plink_conversion_files.sh
+
+#create individual files for --keep parameter:
+#awk &#39;{print $1, $1}&#39; /data/gen1/UKBiobank_500K/severe_asthma/Noemi_PhD/data/eid_demo_EUR_pheno_cov_broadasthma.txt | \
+#    sed -e &#39;1i\IID FID&#39; &gt; /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/broadasthma_individuals
+
+#prep plink file with my case/control individuals and save them in scratch:
+module load plink2
+plink2 \
+    --bgen /data/ukb/nobackup/imputed_v3/ukb_imp_chr${chr}_v3.bgen \
+    ref-first --sample /data/gen1/UKBiobank_500K/severe_asthma/data/ukbiobank_app56607_for_regenie.sample \
+    --keep /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/broadasthma_individuals \
+    --make-bed --out /scratch/gen1/nnp5/REGENIE_assoc/tmp_data/${pheno}_plink_file_v3_chr${chr}</code></pre>
+<p>Code: Post_GWAS/src/pre_processing_files.sh</p>
+<pre class="r"><code>#!/bin/bash
+
+#PBS -N pre_processing_files_GCTAcond
+#PBS -j oe
+#PBS -o pre_processing_files_GCTAcond
+#PBS -l walltime=6:0:0
+#PBS -l nodes=1:ppn=4
+#PBS -l vmem=60gb
+#PBS -W umask=022
+
+chr=$PBS_ARRAYID
+pheno=&quot;broad_pheno&quot;
+
+#GWASsumstat.ma
+#SNP A1 A2 freq b se p N
+#rs1001 A G 0.8493 0.0024 0.0055 0.6653 129850
+#rs1002 C G 0.0306 0.0034 0.0115 0.7659 129799
+#The headers are not keywords and will be omitted by the program.
+# Important: &quot;A1&quot; needs to be the effect allele with &quot;A2&quot; being the other allele and &quot;freq&quot; should be the frequency of &quot;A1&quot;.
+#
+#Note: 1) For a case-control study, the effect size should be log(odds ratio) with its corresponding standard error.
+#2) Please always input the summary statistics of all SNPs even if your analysis only focuses on a subset of SNPs
+#because the program needs the summary data of all SNPs to calculate the phenotypic variance.
+
+
+awk &#39;{print $1, $4, $5, $8, $6, $7, $9, &#39;46086&#39;}&#39; \
+    /home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/maf001_${pheno}_1_5_ratio_betase_input_mungestat_clean | \
+    sed &quot;1s/.*/SNP A1 A2 freq b se p N/&quot; &gt;  /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/${pheno}_GWASsumstat.ma
+
+#sentinels.snplist
+#awk &#39;{print $1}&#39; /home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output/maf001_${pheno}_1_5_ratio_sentinel_variants.txt | \
+#    tail -n +2 \
+#    &gt;  /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/${pheno}_sentinels.snplist
+
+##Create the plink file:
+##qsub -t 1-22 src/plink_conversion_files.sh</code></pre>
+<p>Code: Post_GWAS/src/GCTA_cojocond.sh</p>
 <pre class="r"><code>#!/bin/bash
 
 #PBS -N GCTA_cojoslct
@@ -1952,10 +2017,8 @@ apart, the loci were merged.</p>
 #PBS -W umask=022
 
 #run after Merge_sentinel_region.sh
-#create the /home/n/nnp5/PhD/PhD_project/Fine_mapping_severe_asthma/input/fine_mapping_regions_merged from Merge_sentinel_region.sh output
-##cp /home/n/nnp5/PhD/PhD_project/Fine_mapping_severe_asthma/input/fine_mapping_regions_merged /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/
-#NB: the file is called &#39;fine_mapping_regions_merged&#39; because it is the one I will use for the fine-ammping for all chromosome
-#except for chromosome 10 as I found a new independent variant with the GCTA cojo conditional analysis !
+#Manually create the /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/regions_merged_for_cond from Merge_sentinel_region.sh output
+#output was: /home/n/nnp5/PhD/PhD_project/Post_GWAS/output/merged_sentinel_loci.txt
 
 #GCTA using --cojo-slct parameter
 #run as: qsub /home/n/nnp5/PhD/PhD_project/Post_GWAS/src/GCTA_cojocond.sh
@@ -1970,10 +2033,10 @@ module load plink
 
 for line in {2..14}
 do
-SNP=$(awk -v row=&quot;$line&quot; &#39; NR == row {print $1 } &#39; /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/fine_mapping_regions_merged)
-chr=$(awk -v row=&quot;$line&quot; &#39; NR == row {print $2 } &#39; /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/fine_mapping_regions_merged)
-start=$(awk -v row=&quot;$line&quot; &#39;NR == row {print $4}&#39; /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/fine_mapping_regions_merged)
-end=$(awk -v row=&quot;$line&quot; &#39;NR == row {print $5}&#39; /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/fine_mapping_regions_merged)
+SNP=$(awk -v row=&quot;$line&quot; &#39; NR == row {print $1 } &#39; /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/regions_merged_for_cond)
+chr=$(awk -v row=&quot;$line&quot; &#39; NR == row {print $2 } &#39; /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/regions_merged_for_cond)
+start=$(awk -v row=&quot;$line&quot; &#39;NR == row {print $4}&#39; /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/regions_merged_for_cond)
+end=$(awk -v row=&quot;$line&quot; &#39;NR == row {print $5}&#39; /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/regions_merged_for_cond)
 plink \
     --bfile /scratch/gen1/nnp5/REGENIE_assoc/tmp_data/${pheno}_plink_file_v3_chr${chr} \
     --chr ${chr} --from-bp ${start} --to-bp ${end} \
