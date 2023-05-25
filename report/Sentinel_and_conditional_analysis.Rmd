@@ -41,14 +41,14 @@ Code: src/broad_phenotype/Create_oddsratio.R
 Code: src/merge_loci.R
 ```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/Post_GWAS/src/merge_loci.R'), eval=FALSE}
 ```
-Code: Fine_mapping_severe_asthma/src/Merge_sentinel_region.sh
+Code: src/Merge_sentinel_region.sh
 ```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/Post_GWAS/src/Merge_sentinel_region.sh'), eval=FALSE}
 ```
 Variants with a p-value equal to or below the genome-wide significant threshold of 5e-8 were extracted and the sentinel variant for each genomic loci was chosen as the one with the lowest p-value in its surrounding region of 1Mb (+/- 500Kb). If some loci were less than 500Kb apart, the loci were merged.
 
 ## Conditional analysis
-Code: Post_GWAS/src/GCTA_cojocond.sh
-```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/src/broad_phenotype/Create_oddsratio.R'), eval=FALSE}
+Code: src/GCTA_cojocond.sh
+```{r, code = readLines('/home/n/nnp5/PhD/PhD_project/Post_GWAS/src/GCTA_cojocond.sh'), eval=FALSE}
 ```
 In order to investigate if there were other independently associated variants, I used the GCTA conditional analysis software with the --cojo-slct parameter which performs a stepwise model selection (v1.90.2beta) [1]. I analysed regions +/- 2Mb from the sentinel variants. The loci on chromosome 6 embrace the MHC region which has a complex LD structure; thus the conditional analysis is not used for this area.
 

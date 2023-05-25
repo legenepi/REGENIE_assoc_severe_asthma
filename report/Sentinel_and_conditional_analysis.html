@@ -1587,7 +1587,7 @@ border-radius: 0px;
 <h1 class="title toc-ignore">Sentinel selection and conditional
 analysis</h1>
 <h4 class="author">Nomei Nicole Piga</h4>
-<h4 class="date">21 May, 2023</h4>
+<h4 class="date">25 May, 2023</h4>
 
 </div>
 
@@ -1913,7 +1913,7 @@ loci &lt;- sentinels %&gt;%
 
 sink()
 write.table(loci, output_file, row.names = F, sep = &quot;\t&quot;, quote=F)</code></pre>
-<p>Code: Fine_mapping_severe_asthma/src/Merge_sentinel_region.sh</p>
+<p>Code: src/Merge_sentinel_region.sh</p>
 <pre class="r"><code>#!/bin/bash
 
 PATH_OUT=&quot;/home/n/nnp5/PhD/PhD_project/REGENIE_assoc/output&quot;
@@ -1928,7 +1928,10 @@ module unload R/4.2.1
 module load R/4.1.0
 chmod o+x src/merge_loci.R
 dos2unix src/merge_loci.R
-Rscript src/merge_loci.R ${PATH_OUT}/${PHENO}_sentinel_variants.txt 1000000 500000 output/merged_sentinel_loci.txt</code></pre>
+Rscript src/merge_loci.R ${PATH_OUT}/${PHENO}_sentinel_variants.txt \
+    1000000 \
+    500000 \
+    /home/n/nnp5/PhD/PhD_project/Fine_mapping_severe_asthma/input/fine_mapping_regions_merged</code></pre>
 <p>Variants with a p-value equal to or below the genome-wide significant
 threshold of 5e-8 were extracted and the sentinel variant for each
 genomic loci was chosen as the one with the lowest p-value in its
@@ -1937,34 +1940,73 @@ apart, the loci were merged.</p>
 </div>
 <div id="conditional-analysis" class="section level2">
 <h2>Conditional analysis</h2>
-<p>Code: Post_GWAS/src/GCTA_cojocond.sh</p>
-<pre class="r"><code>#!/usr/bin/env Rscript
+<p>Code: src/GCTA_cojocond.sh</p>
+<pre class="r"><code>#!/bin/bash
+
+#PBS -N GCTA_cojoslct
+#PBS -j oe
+#PBS -o log_GCTA_cojoslct
+#PBS -l walltime=2:0:0
+#PBS -l nodes=1:ppn=4
+#PBS -l vmem=90gb
+#PBS -W umask=022
+
+#run after Merge_sentinel_region.sh
+# create the /home/n/nnp5/PhD/PhD_project/Fine_mapping_severe_asthma/input/fine_mapping_regions_merged from Merge_sentinel_region.sh output
+##cp /home/n/nnp5/PhD/PhD_project/Fine_mapping_severe_asthma/input/fine_mapping_regions_merged /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/
+#GCTA using --cojo-slct parameter
+#run as: qsub /home/n/nnp5/PhD/PhD_project/Post_GWAS/src/GCTA_cojocond.sh
 
 
-suppressMessages(library(tidyverse))
-suppressMessages(library(data.table))
+sample_DIR=&quot;/data/gen1/UKBiobank_500K/severe_asthma/data&quot;
+pheno=&quot;broad_pheno&quot;
+module load plink
 
-args = commandArgs(trailingOnly=TRUE)
+#Some sentinels have overlapping regions, therefore i extract the whole region and run the conditional analysis on the whole region
+#taking into account multiple sentinels. This is the case for sentinel on chromosome 5 (rs2188962,rs152815)
+#and on chromosome 12 (rs9271365,rs3024971). Chromosome 6: do not run conditional.
+#run cgta-condcojo:
 
-input_file = args[1]
-output_file = args[2]
+for line in {2..14}
+do
+SNP=$(awk -v row=&quot;$line&quot; &#39; NR == row {print $1 } &#39; /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/fine_mapping_regions_merged)
+chr=$(awk -v row=&quot;$line&quot; &#39; NR == row {print $2 } &#39; /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/fine_mapping_regions_merged)
+start=$(awk -v row=&quot;$line&quot; &#39;NR == row {print $4}&#39; /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/fine_mapping_regions_merged)
+end=$(awk -v row=&quot;$line&quot; &#39;NR == row {print $5}&#39; /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/fine_mapping_regions_merged)
+plink \
+    --bfile /scratch/gen1/nnp5/REGENIE_assoc/tmp_data/${pheno}_plink_file_v3_chr${chr} \
+    --chr ${chr} --from-bp ${start} --to-bp ${end} \
+    --make-bed --out /scratch/gen1/nnp5/REGENIE_assoc/tmp_data/${pheno}_plink_file_v3_chr${chr}_${SNP}
+
+    /home/r/rja34/bin/gcta_1.90.2beta/gcta64 \
+    --bfile  /scratch/gen1/nnp5/REGENIE_assoc/tmp_data/${pheno}_plink_file_v3_chr${chr}_${SNP} \
+    --cojo-file /home/n/nnp5/PhD/PhD_project/Post_GWAS/input/${pheno}_GWASsumstat.ma \
+    --cojo-slct \
+    --cojo-p 5e-8 \
+    --maf 0.01 \
+    --cojo-actual-geno \
+    --exclude /data/gen1/UKBiobank_500K/imputed/multiallelic.snps \
+    --out /home/n/nnp5/PhD/PhD_project/Post_GWAS/output/cojoslct_chr${chr}_${SNP}
+done
 
 
-#input:
-sumstat &lt;- read.table(input_file,header=T)
+#write results for genome-wide variants:
+cat /home/n/nnp5/PhD/PhD_project/Post_GWAS/output/cojoslct_chr${chr}_${SNP}.jma.cojo | sort -u | head -n -1 | \
+    sed &quot;1s/.*/Chr  SNP bp  refA  freq  b se  p n freq_geno bJ  bJ_se pJ  LD_r/&quot; \
+    &gt; /home/n/nnp5/PhD/PhD_project/Post_GWAS/output/cojoslct_genomewide
 
-#create odds_ratio ci_lower ci_upper
-sumstat$odds_ratio &lt;- exp(sumstat$LOG_ODDS)
-sumstat$ci_lower &lt;- exp(sumstat$LOG_ODDS - qnorm(0.975)*sumstat$se)
-sumstat$ci_upper &lt;- exp(sumstat$LOG_ODDS + qnorm(0.975)*sumstat$se)
+awk &#39;$1 !=6 &amp;&amp; $13 &lt;= 0.00000005&#39; /home/n/nnp5/PhD/PhD_project/Post_GWAS/output/cojoslct_chr*.jma.cojo \
+    &gt;&gt; /home/n/nnp5/PhD/PhD_project/Post_GWAS/output/cojoslct_genomewide
 
-#create unique column:
-sumstat$&#39;OR_95_CI&#39; &lt;- paste0(format(round(sumstat$odds_ratio,2),nsmall=2),&quot; [&quot;,format(round(sumstat$ci_lower,2),nsmall=2),&quot;-&quot;,format(round(sumstat$ci_upper,2),nsmall=2),&quot;]&quot;)
+#one additional signal on chromsome 10 (rs1444789): check ld with sentinel rs201499805:
+#they are independent:
+plink --bfile /scratch/gen1/nnp5/REGENIE_assoc/tmp_data/broad_pheno_plink_file_v3_chr10 \
+    --ld rs201499805 rs1444789 \
+    &gt; /home/n/nnp5/PhD/PhD_project/Post_GWAS/output/rs201499805_rs1444789_ld
 
-#direction of effect:
-sumstat &lt;- sumstat %&gt;% mutate(direction_of_effect=ifelse(sumstat$LOG_ODDS &gt; 0, &quot;+&quot;,&quot;-&quot;))
-
-write.table(sumstat,output_file,sep=&quot;\t&quot;,quote=F,row.names=F)</code></pre>
+#add new independent variant (rs1444789) to the sentinel variant:
+echo &quot;rs1444789 10 9064361 C T 0.141266 0.0240968 0.186346 4.56104e-09 0.186346&quot; | \
+    cat  ${PATH_OUT}/${PHENO}_sentinel_variants.txt</code></pre>
 <p>In order to investigate if there were other independently associated
 variants, I used the GCTA conditional analysis software with the
 –cojo-slct parameter which performs a stepwise model selection
